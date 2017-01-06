@@ -5,12 +5,14 @@ const OrbitControls = require('three-orbit-controls')(THREE)
 const WindowResize = require('three-window-resize')
 const range = require('lodash.range')
 const sample = require('lodash.sample')
-const random = require('lodash.random')
 const round = require('lodash.round')
 
+const numRails = 40
 const groundLevel = -1
 const railSpacing = 4
 let railTicker = 0
+const powerLineSpacing = 10
+let powerLineTicker = 0
 
 class Environment {
 
@@ -31,22 +33,29 @@ class Environment {
     const windowResize = new WindowResize(this.renderer, this.camera)
     console.log({ windowResize })
 
-    this.addRailSegmentsToScene(40)
-    // this.addPoles(100)
+    this.addRailSegmentsToScene(numRails)
+    this.addPowerLinesToScene()
   }
 
   render () {
     this.camera.position.z -= 0.1
-    if (this.isReadyToAddRailSegment()) {
-      this.addRailSegmentToEnd()
-    }
+    if (this.isReadyToAddRailSegment()) { this.addRailSegmentToEnd() }
+    if (this.isReadyToAddPowerLine()) { this.addPowerLineToEnd() }
+
     this.renderer.render(this.scene, this.camera)
   }
 
   // 'private'
 
   isReadyToAddRailSegment () {
-    return round(-this.camera.position.z, 1) % 4 === 0
+    return round(-this.camera.position.z, 1) % railSpacing === 0
+  }
+
+  isReadyToAddPowerLine () {
+    return round(-this.camera.position.z, 1) % powerLineSpacing === 0
+  }
+
+  addPowerLineToEnd () {
   }
 
   addRailSegmentToEnd () {
@@ -59,29 +68,31 @@ class Environment {
     this.scene.add(railSegmentToAdd.right)
   }
 
-  addPoles (distance) {
-    range(1, distance, 10).forEach(z => this.addPole(z))
+  addPowerLinesToScene () {
+    const numberOfPowerLines = numRails * railSpacing / powerLineSpacing
+    this.powerLines = range(numberOfPowerLines).map(() => this.createPowerLine())
+    this.powerLines.forEach(({ cross, pole }) => {
+      this.scene.add(cross)
+      this.scene.add(pole)
+    })
   }
 
-  addPole (z) {
+  createPowerLine () {
+    powerLineTicker++
     const poleHeight = 3
     const material = new MeshBasicMaterial({ color: 0x000000 })
     const x = sample([-5, 5])
 
     const poleGeometry = new CylinderGeometry(0.02, 0.02, poleHeight, 32)
     const pole = new Mesh(poleGeometry, material)
-    pole.position.z = -z
-    pole.position.y = groundLevel + poleHeight / 2
-    pole.position.x = x
-    this.scene.add(pole)
+    pole.position.set(x, groundLevel + poleHeight / 2, -powerLineTicker * powerLineSpacing)
 
     const crossGeometry = new CylinderGeometry(0.02, 0.02, 0.4, 32)
     const cross = new Mesh(crossGeometry, material)
     cross.rotation.z = Math.PI / 2
-    cross.position.z = -z
-    cross.position.y = groundLevel + poleHeight / 2 + random(poleHeight / 8, poleHeight / 3)
-    cross.position.x = x
-    this.scene.add(cross)
+    cross.position.set(x, groundLevel + 2 * poleHeight / 3, -powerLineTicker * powerLineSpacing)
+
+    return { pole, cross }
   }
 
   addRailSegmentsToScene (number) {

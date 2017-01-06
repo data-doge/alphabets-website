@@ -34,7 +34,6 @@
   "homepage": "https://github.com/data-doge/alphabets-website",
   "dependencies": {
     "jquery": "^2.2.3",
-    "lodash.random": "^3.2.0",
     "lodash.range": "^3.2.0",
     "lodash.round": "^4.0.4",
     "lodash.sample": "^4.2.1",
