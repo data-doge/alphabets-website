@@ -1,13 +1,12 @@
 const THREE = require('three')
 const { Scene, PerspectiveCamera, WebGLRenderer, MeshBasicMaterial, Mesh, BoxGeometry, Vector3, CylinderGeometry } = THREE
 const $ = require('jquery')
-const OrbitControls = require('three-orbit-controls')(THREE)
 const WindowResize = require('three-window-resize')
 const range = require('lodash.range')
 const sample = require('lodash.sample')
 const round = require('lodash.round')
 
-const numRails = 40
+const numRails = 20
 const groundLevel = -1
 const railSpacing = 4
 let railTicker = 0
@@ -24,8 +23,6 @@ class Environment {
     this.camera.position.y = 0
     this.camera.lookAt(new Vector3(0, 0, 0))
 
-    this.controls = new OrbitControls(this.camera)
-
     this.renderer = new WebGLRenderer({alpha: true, canvas: $('#three-canvas')[0]})
     this.renderer.setSize(window.innerWidth, window.innerHeight)
     this.renderer.setClearColor(0xffffff, 1)
@@ -41,7 +38,6 @@ class Environment {
     this.camera.position.z -= 0.1 // reciprocal of incrementor must be a whole number or everything is fucked
     if (this.isReadyToAddRailSegment()) { this.addRailSegmentToEnd() }
     if (this.isReadyToAddPowerLine()) { this.addPowerLineToEnd() }
-
     this.renderer.render(this.scene, this.camera)
   }
 
