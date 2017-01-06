@@ -31,3 +31,34 @@ body {
   font-size: 18px;
   font-weight: 300;
 }
+
+#sun {
+  position: fixed;
+  width: 70px;
+  height: 70px;
+  border: 2px solid black;
+  border-radius: 50%;
+  bottom: 46%;
+  right: 90px;
+  background: transparent;
+  z-index: -20;
+}
+
+#horizon {
+  height: 1px;
+  background: rgba(0,0,0,0.1);
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 51.11%;
+}
+
+#ground-overlay {
+  background: white;
+  height: 48.89%;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  position: fixed;
+  z-index: -10;
+}
