@@ -11,7 +11,7 @@ const numRails = 40
 const groundLevel = -1
 const railSpacing = 4
 let railTicker = 0
-const powerLineSpacing = 10
+const powerLineSpacing = 100
 let powerLineTicker = 0
 
 class Environment {
@@ -19,7 +19,7 @@ class Environment {
   constructor () {
     this.scene = new Scene()
 
-    this.camera = new PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.01, 1000)
+    this.camera = new PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.01, 50)
     this.camera.position.z = 0
     this.camera.position.y = 0
     this.camera.lookAt(new Vector3(0, 0, 0))
@@ -38,7 +38,7 @@ class Environment {
   }
 
   render () {
-    this.camera.position.z -= 0.1
+    this.camera.position.z -= 0.1 // reciprocal of incrementor must be a whole number or everything is fucked
     if (this.isReadyToAddRailSegment()) { this.addRailSegmentToEnd() }
     if (this.isReadyToAddPowerLine()) { this.addPowerLineToEnd() }
 
@@ -56,6 +56,13 @@ class Environment {
   }
 
   addPowerLineToEnd () {
+    let powerLineToRemove = this.powerLines.shift()
+    this.scene.remove(powerLineToRemove.pole)
+    this.scene.remove(powerLineToRemove.cross)
+    let powerLineToAdd = this.createPowerLine()
+    this.powerLines.push(powerLineToAdd)
+    this.scene.add(powerLineToAdd.pole)
+    this.scene.add(powerLineToAdd.cross)
   }
 
   addRailSegmentToEnd () {
