@@ -1,13 +1,16 @@
 const THREE = require('three')
-const { Scene, PerspectiveCamera, WebGLRenderer, MeshBasicMaterial, Mesh, AxisHelper, BoxGeometry, Vector3, CylinderGeometry } = THREE
+const { Scene, PerspectiveCamera, WebGLRenderer, MeshBasicMaterial, Mesh, BoxGeometry, Vector3, CylinderGeometry } = THREE
 const $ = require('jquery')
 const OrbitControls = require('three-orbit-controls')(THREE)
 const WindowResize = require('three-window-resize')
 const range = require('lodash.range')
 const sample = require('lodash.sample')
 const random = require('lodash.random')
+const round = require('lodash.round')
 
 const groundLevel = -1
+const railSpacing = 4
+let railTicker = 0
 
 class Environment {
 
@@ -15,7 +18,7 @@ class Environment {
     this.scene = new Scene()
 
     this.camera = new PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.01, 1000)
-    this.camera.position.z = 2
+    this.camera.position.z = 0
     this.camera.position.y = 0
     this.camera.lookAt(new Vector3(0, 0, 0))
 
@@ -28,19 +31,33 @@ class Environment {
     const windowResize = new WindowResize(this.renderer, this.camera)
     console.log({ windowResize })
 
-    const axisHelper = new AxisHelper(1)
-    this.scene.add(axisHelper)
-
-    this.addRails()
-    this.addPoles(100)
+    this.addRailSegmentsToScene(40)
+    // this.addPoles(100)
   }
 
   render () {
     this.camera.position.z -= 0.1
+    if (this.isReadyToAddRailSegment()) {
+      this.addRailSegmentToEnd()
+    }
     this.renderer.render(this.scene, this.camera)
   }
 
   // 'private'
+
+  isReadyToAddRailSegment () {
+    return round(-this.camera.position.z, 1) % 4 === 0
+  }
+
+  addRailSegmentToEnd () {
+    let railSegmentToRemove = this.railSegments.shift()
+    this.scene.remove(railSegmentToRemove.left)
+    this.scene.remove(railSegmentToRemove.right)
+    let railSegmentToAdd = this.createRailSegment()
+    this.railSegments.push(railSegmentToAdd)
+    this.scene.add(railSegmentToAdd.left)
+    this.scene.add(railSegmentToAdd.right)
+  }
 
   addPoles (distance) {
     range(1, distance, 10).forEach(z => this.addPole(z))
@@ -67,23 +84,23 @@ class Environment {
     this.scene.add(cross)
   }
 
-  addRails () {
-    range(100).forEach(z => this.addRailSegment(z))
+  addRailSegmentsToScene (number) {
+    this.railSegments = range(number).map(() => this.createRailSegment())
+    this.railSegments.forEach(({ left, right }) => {
+      this.scene.add(left)
+      this.scene.add(right)
+    })
   }
 
-  addRailSegment (z) {
-    const geometry = new BoxGeometry(0.2, 0.1, 1)
+  createRailSegment () {
+    railTicker++
+    const geometry = new BoxGeometry(0.2, 0.02, 1)
     const material = new MeshBasicMaterial({ color: 0x000000 })
-    const leftRail = new Mesh(geometry, material)
-    this.scene.add(leftRail)
-    leftRail.position.z = -z * 4
-    leftRail.position.y = groundLevel
-    leftRail.position.x = -3
-    const rightRail = new Mesh(geometry, material)
-    this.scene.add(rightRail)
-    rightRail.position.z = -z * 4
-    rightRail.position.y = groundLevel
-    rightRail.position.x = 3
+    const left = new Mesh(geometry, material)
+    left.position.set(-3, groundLevel, -railTicker * railSpacing)
+    const right = new Mesh(geometry, material)
+    right.position.set(3, groundLevel, -railTicker * railSpacing)
+    return { left, right }
   }
 
 }
