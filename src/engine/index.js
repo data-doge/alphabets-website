@@ -1,11 +1,11 @@
-const Stats = require('stats-js')
-var stats = new Stats()
-stats.setMode(0) // 0: fps, 1: ms
-stats.domElement.style.position = 'absolute'
-stats.domElement.style.left = '0px'
-stats.domElement.style.top = '0px'
-document.body.appendChild(stats.domElement)
-
+// const Stats = require('stats-js')
+// var stats = new Stats()
+// stats.setMode(0) // 0: fps, 1: ms
+// stats.domElement.style.position = 'absolute'
+// stats.domElement.style.left = '0px'
+// stats.domElement.style.top = '0px'
+// document.body.appendChild(stats.domElement)
+//
 const Environment = require('./environment')
 const View = require('./view')
 const $ = require('jquery')
@@ -24,9 +24,9 @@ class Engine {
 
   start () {
     loop(t => {
-      stats.begin()
+      // stats.begin()
       this.environment.render()
-      stats.end()
+      // stats.end()
     }).start()
   }
 
