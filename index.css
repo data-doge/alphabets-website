@@ -31,3 +31,22 @@ body {
   font-size: 18px;
   font-weight: 300;
 }
+
+#sun {
+  position: absolute;
+  width: 70px;
+  height: 70px;
+  border: 2px solid black;
+  border-radius: 50%;
+  background: transparent;
+}
+
+#horizon {
+  height: 1px;
+  background: rgba(0,0,0,0.2);
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 51.11%;
+  z-index: 1000;
+}
