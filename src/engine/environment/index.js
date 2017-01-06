@@ -25,7 +25,7 @@ class Environment {
 
     this.renderer = new WebGLRenderer({alpha: true, canvas: $('#three-canvas')[0]})
     this.renderer.setSize(window.innerWidth, window.innerHeight)
-    this.renderer.setClearColor(0xffffff, 1)
+    this.renderer.setClearColor(0x000000, 0)
 
     const windowResize = new WindowResize(this.renderer, this.camera)
     console.log({ windowResize })
