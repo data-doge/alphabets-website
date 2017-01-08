@@ -53581,8 +53581,31 @@ class View {
   }
 
   renderSun() {
+    var _this = this;
+
     this.$sun = $('<div id="sun"></div>');
     $('body').append(this.$sun);
+    var centerX = $(window).width() / 2 - this.$sun.width() / 2;
+    var centerY = $(window).height() / 2 - this.$sun.height() / 2;
+
+    this.$moon = $('<div id="moon"></div>');
+    $('body').append(this.$moon);
+
+    var a = 500;
+    var b = 300;
+    var theta = 0;
+
+    setInterval(function (t) {
+      _this.$sun.offset({
+        top: centerY + b * Math.sin(theta),
+        left: centerX + a * Math.cos(theta)
+      });
+      _this.$moon.offset({
+        top: centerY + b * Math.sin(theta + Math.PI),
+        left: centerX + a * Math.cos(theta + Math.PI)
+      });
+      theta -= Math.PI / 180 / 8;
+    }, 40);
   }
 
 }

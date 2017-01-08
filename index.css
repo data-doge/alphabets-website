@@ -80,11 +80,20 @@ a:hover {
   position: fixed;
   width: 70px;
   height: 70px;
+  border-radius: 50%;
+  background: black;
+  z-index: -20;
+}
+
+#moon {
+  position: fixed;
+  width: 70px;
+  height: 70px;
   border: 2px solid black;
   border-radius: 50%;
   bottom: 46%;
   right: 90px;
-  background: transparent;
+  background: white;
   z-index: -20;
 }
 
