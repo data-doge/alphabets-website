@@ -8,6 +8,7 @@
 //
 const Environment = require('./environment')
 const View = require('./view')
+const Space = require('./space')
 const $ = require('jquery')
 const loop = require('raf-loop')
 
@@ -16,6 +17,7 @@ class Engine {
   constructor () {
     this.environment = new Environment()
     this.view = new View()
+    this.space = new Space()
   }
 
   bindEventListeners () {
@@ -23,9 +25,13 @@ class Engine {
   }
 
   start () {
+    this.space.show()
+    let theta = 0
     loop(t => {
       // stats.begin()
       this.environment.render()
+      theta -= 0.01
+      this.space.update(theta)
       // stats.end()
     }).start()
   }
