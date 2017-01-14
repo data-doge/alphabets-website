@@ -16,6 +16,7 @@ let powerLineTicker = 0
 class Environment {
 
   constructor () {
+    this.materialColor = 0x000000
     this.scene = new Scene()
 
     this.camera = new PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.01, 50)
@@ -39,6 +40,15 @@ class Environment {
     if (this.isReadyToAddRailSegment()) { this.addRailSegmentToEnd() }
     if (this.isReadyToAddPowerLine()) { this.addPowerLineToEnd() }
     this.renderer.render(this.scene, this.camera)
+  }
+
+  invertColors () {
+    this.materialColor = this.materialColor === 0x000000 ? 0xffffff : 0x000000
+    this.scene.traverse(node => {
+      if (node instanceof THREE.Mesh) {
+        node.material = new THREE.MeshBasicMaterial({ color: this.materialColor })
+      }
+    })
   }
 
   // 'private'
@@ -83,7 +93,7 @@ class Environment {
   createPowerLine () {
     powerLineTicker++
     const poleHeight = 3
-    const material = new MeshBasicMaterial({ color: 0x000000 })
+    const material = new MeshBasicMaterial({ color: this.materialColor })
     const x = sample([-5, 5])
 
     const poleGeometry = new CylinderGeometry(0.02, 0.02, poleHeight, 32)
@@ -109,7 +119,7 @@ class Environment {
   createRailSegment () {
     railTicker++
     const geometry = new BoxGeometry(0.2, 0.02, 1)
-    const material = new MeshBasicMaterial({ color: 0x000000 })
+    const material = new MeshBasicMaterial({ color: this.materialColor })
     const left = new Mesh(geometry, material)
     left.position.set(-3, groundLevel, -railTicker * railSpacing)
     const right = new Mesh(geometry, material)

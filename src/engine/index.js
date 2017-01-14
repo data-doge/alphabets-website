@@ -34,6 +34,7 @@ class Engine {
       this.space.update(deg / 180 * Math.PI)
       if (deg % 180 === 0) {
         this.view.invertColors()
+        this.environment.invertColors()
       }
       // stats.end()
     }).start()
