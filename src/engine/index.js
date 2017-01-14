@@ -6,11 +6,13 @@
 // stats.domElement.style.top = '0px'
 // document.body.appendChild(stats.domElement)
 //
+const $ = require('jquery')
+const loop = require('raf-loop')
 const Environment = require('./environment')
 const View = require('./view')
 const Space = require('./space')
-const $ = require('jquery')
-const loop = require('raf-loop')
+const AudioInterface = require('./audio-interface')
+const round = require('lodash.round')
 
 class Engine {
 
@@ -18,6 +20,7 @@ class Engine {
     this.environment = new Environment()
     this.view = new View()
     this.space = new Space()
+    this.audioInterface = new AudioInterface()
   }
 
   bindEventListeners () {
@@ -30,9 +33,11 @@ class Engine {
     loop(t => {
       // stats.begin()
       this.environment.render()
-      deg--
-      this.space.update(deg / 180 * Math.PI)
-      if (deg % 180 === 0) {
+      deg -= 0.1
+      const { overallAmplitude } = this.audioInterface.measure()
+      this.space.update(deg / 180 * Math.PI, overallAmplitude)
+
+      if (round(deg, 1) % 180 === 0) {
         this.view.invertColors()
         this.environment.invertColors()
       }
