@@ -19,6 +19,7 @@ body {
   left: 40px;
   width: 400px;
   z-index: 10;
+  color: black;
 }
 
 h1 {
@@ -47,7 +48,7 @@ li {
 
 a {
   text-decoration: none;
-  color: black;
+  color: inherit;
   border-bottom: 1px solid black;
   transition: 0.5s;
   cursor: pointer;
@@ -77,6 +78,7 @@ a:hover {
 }
 
 #sun {
+  display: none;
   position: fixed;
   width: 70px;
   height: 70px;
@@ -86,6 +88,7 @@ a:hover {
 }
 
 #moon {
+  display: none;
   position: fixed;
   width: 70px;
   height: 70px;
