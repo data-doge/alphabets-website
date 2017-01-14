@@ -26,12 +26,15 @@ class Engine {
 
   start () {
     this.space.show()
-    let theta = 0
+    let deg = 0
     loop(t => {
       // stats.begin()
       this.environment.render()
-      theta -= 0.01
-      this.space.update(theta)
+      deg--
+      this.space.update(deg / 180 * Math.PI)
+      if (deg % 180 === 0) {
+        this.view.invertColors()
+      }
       // stats.end()
     }).start()
   }
