@@ -30,16 +30,23 @@ class Engine {
   start () {
     this.space.show()
     let deg = 0
+    const lightChangeCountdown = 20
     loop(t => {
       // stats.begin()
       this.environment.render()
-      deg -= 0.1
+      deg -= 0.2
       const { overallAmplitude } = this.audioInterface.measure()
       this.space.update(deg / 180 * Math.PI, overallAmplitude)
 
-      if (round(deg, 1) % 180 === 0) {
-        this.view.invertColors()
-        this.environment.invertColors()
+      const ticker = -1 * round(deg, 1) % 180
+      if (ticker > 180 - lightChangeCountdown) {
+        let currentCount = 180 - ticker
+        // if (this.view.isDay()) {
+          this.view.makeDarker(currentCount, lightChangeCountdown)
+          this.environment.makeLighter(currentCount, lightChangeCountdown)
+        // } else {
+
+        // }
       }
       // stats.end()
     }).start()

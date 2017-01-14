@@ -1,5 +1,5 @@
 const THREE = require('three')
-const { Scene, PerspectiveCamera, WebGLRenderer, MeshBasicMaterial, Mesh, BoxGeometry, Vector3, CylinderGeometry } = THREE
+const { Scene, PerspectiveCamera, WebGLRenderer, MeshBasicMaterial, Mesh, BoxGeometry, Vector3, CylinderGeometry, Color } = THREE
 const $ = require('jquery')
 const WindowResize = require('three-window-resize')
 const range = require('lodash.range')
@@ -42,8 +42,9 @@ class Environment {
     this.renderer.render(this.scene, this.camera)
   }
 
-  invertColors () {
-    this.materialColor = this.materialColor === 0x000000 ? 0xffffff : 0x000000
+  makeLighter (currentCount, totalCount) {
+    const opacity = 100 - Math.round(currentCount / totalCount * 100)
+    this.materialColor = new THREE.Color(`hsl(0, 0%, ${opacity}%)`)
     this.scene.traverse(node => {
       if (node instanceof THREE.Mesh) {
         node.material = new THREE.MeshBasicMaterial({ color: this.materialColor })
