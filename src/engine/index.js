@@ -28,7 +28,7 @@ class Engine {
 
     loop(t => {
       this.environment.render()
-      deg += 0.05
+      deg += 0.1
       const { overallAmplitude } = this.audioInterface.measure()
       this.space.update(-1 * deg / 180 * Math.PI, overallAmplitude)
       const ticker = 1 * round(deg, 1) % 180

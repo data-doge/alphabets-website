@@ -44,20 +44,20 @@ class Environment {
 
   makeLighter (currentCount, totalCount) {
     const opacity = 100 - Math.round(currentCount / totalCount * 100)
-    this.materialColor = new THREE.Color(`hsl(0, 0%, ${opacity}%)`)
+    this.materialColor = new Color(`hsl(0, 0%, ${opacity}%)`)
     this.scene.traverse(node => {
-      if (node instanceof THREE.Mesh) {
-        node.material = new THREE.MeshBasicMaterial({ color: this.materialColor })
+      if (node instanceof Mesh) {
+        node.material = new MeshBasicMaterial({ color: this.materialColor })
       }
     })
   }
 
   makeDarker (currentCount, totalCount) {
     const opacity = Math.round(currentCount / totalCount * 100)
-    this.materialColor = new THREE.Color(`hsl(0, 0%, ${opacity}%)`)
+    this.materialColor = new Color(`hsl(0, 0%, ${opacity}%)`)
     this.scene.traverse(node => {
-      if (node instanceof THREE.Mesh) {
-        node.material = new THREE.MeshBasicMaterial({ color: this.materialColor })
+      if (node instanceof Mesh) {
+        node.material = new MeshBasicMaterial({ color: this.materialColor })
       }
     })
   }
