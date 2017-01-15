@@ -56007,10 +56007,10 @@ class Environment {
     var _this = this;
 
     var opacity = 100 - Math.round(currentCount / totalCount * 100);
-    this.materialColor = new THREE.Color('hsl(0, 0%, ' + opacity + '%)');
+    this.materialColor = new Color('hsl(0, 0%, ' + opacity + '%)');
     this.scene.traverse(function (node) {
-      if (node instanceof THREE.Mesh) {
-        node.material = new THREE.MeshBasicMaterial({ color: _this.materialColor });
+      if (node instanceof Mesh) {
+        node.material = new MeshBasicMaterial({ color: _this.materialColor });
       }
     });
   }
@@ -56019,10 +56019,10 @@ class Environment {
     var _this2 = this;
 
     var opacity = Math.round(currentCount / totalCount * 100);
-    this.materialColor = new THREE.Color('hsl(0, 0%, ' + opacity + '%)');
+    this.materialColor = new Color('hsl(0, 0%, ' + opacity + '%)');
     this.scene.traverse(function (node) {
-      if (node instanceof THREE.Mesh) {
-        node.material = new THREE.MeshBasicMaterial({ color: _this2.materialColor });
+      if (node instanceof Mesh) {
+        node.material = new MeshBasicMaterial({ color: _this2.materialColor });
       }
     });
   }
@@ -56154,7 +56154,7 @@ class Engine {
 
     loop(function (t) {
       _this.environment.render();
-      deg += 0.05;
+      deg += 0.1;
 
       var _audioInterface$measu = _this.audioInterface.measure(),
           overallAmplitude = _audioInterface$measu.overallAmplitude;
