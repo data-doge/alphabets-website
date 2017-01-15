@@ -50,7 +50,6 @@ a {
   text-decoration: none;
   color: inherit;
   border-bottom: 1px solid black;
-  transition: 0.5s;
   cursor: pointer;
 }
 
@@ -92,7 +91,6 @@ a:hover {
   position: fixed;
   width: 70px;
   height: 70px;
-  border: 2px solid black;
   border-radius: 50%;
   bottom: 46%;
   right: 90px;
