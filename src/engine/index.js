@@ -1,11 +1,3 @@
-// const Stats = require('stats-js')
-// var stats = new Stats()
-// stats.setMode(0) // 0: fps, 1: ms
-// stats.domElement.style.position = 'absolute'
-// stats.domElement.style.left = '0px'
-// stats.domElement.style.top = '0px'
-// document.body.appendChild(stats.domElement)
-//
 const $ = require('jquery')
 const loop = require('raf-loop')
 const Environment = require('./environment')
@@ -28,27 +20,29 @@ class Engine {
   }
 
   start () {
-    this.space.show()
     let deg = 0
+    let isDay = true
     const lightChangeCountdown = 20
-    loop(t => {
-      // stats.begin()
-      this.environment.render()
-      deg -= 0.2
-      const { overallAmplitude } = this.audioInterface.measure()
-      this.space.update(deg / 180 * Math.PI, overallAmplitude)
 
-      const ticker = -1 * round(deg, 1) % 180
+    this.space.show()
+
+    loop(t => {
+      this.environment.render()
+      deg += 0.05
+      const { overallAmplitude } = this.audioInterface.measure()
+      this.space.update(-1 * deg / 180 * Math.PI, overallAmplitude)
+      const ticker = 1 * round(deg, 1) % 180
+      if (ticker % 180 === 0) { isDay = !isDay }
       if (ticker > 180 - lightChangeCountdown) {
         let currentCount = 180 - ticker
-        // if (this.view.isDay()) {
+        if (isDay) {
           this.view.makeDarker(currentCount, lightChangeCountdown)
           this.environment.makeLighter(currentCount, lightChangeCountdown)
-        // } else {
-
-        // }
+        } else {
+          this.view.makeLighter(currentCount, lightChangeCountdown)
+          this.environment.makeDarker(currentCount, lightChangeCountdown)
+        }
       }
-      // stats.end()
     }).start()
   }
 

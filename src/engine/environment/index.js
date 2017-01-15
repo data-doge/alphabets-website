@@ -52,6 +52,16 @@ class Environment {
     })
   }
 
+  makeDarker (currentCount, totalCount) {
+    const opacity = Math.round(currentCount / totalCount * 100)
+    this.materialColor = new THREE.Color(`hsl(0, 0%, ${opacity}%)`)
+    this.scene.traverse(node => {
+      if (node instanceof THREE.Mesh) {
+        node.material = new THREE.MeshBasicMaterial({ color: this.materialColor })
+      }
+    })
+  }
+
   // 'private'
 
   isReadyToAddRailSegment () {
