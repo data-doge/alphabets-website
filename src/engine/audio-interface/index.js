@@ -10,18 +10,17 @@ class AudioInterface {
     this.analyser = webAudioAnalyser2({
       context: this.ctx,
       fftSize: 2048,
-      equalTemperedFreqBinCount: 10
+      equalTemperedFreqBinCount: 7
     })
     this.out = this.ctx.destination
 
     this.src.connect(this.analyser)
-    // TODO: uncomment to hear music
-    // this.analyser.connect(this.out)
+    this.analyser.connect(this.out)
     this.audio.play()
   }
 
   measure () {
-    const { frequencies, overallAmplitude } = this.analyser.barkScaleFrequencyData()
+    const { frequencies, overallAmplitude } = this.analyser.equalTemperedFrequencyData(7)
     return { frequencies, overallAmplitude }
   }
 }
