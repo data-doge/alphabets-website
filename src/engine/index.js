@@ -65,12 +65,20 @@ class Engine {
       pointYCoords.push(y)
       pointYCoords.push(0)
     })
+    const coords = pointYCoords.map((y, i, arr) => ({
+      x: scale(i + 1, 0, arr.length, 0, width),
+      y: height - 1 * y
+    }))
+
     ctx.beginPath()
     ctx.moveTo(0, height)
-    pointYCoords.forEach((y, i, arr) => {
-      const x = scale(i + 1, 0, arr.length, 0, width)
-      ctx.lineTo(x, height - 0.5 * y)
-    })
+    let i
+    for (i = 0; i < coords.length - 2; i++) {
+      const xc = (coords[i].x + coords[i + 1].x) / 2
+      const yc = (coords[i].y + coords[i + 1].y) / 2
+      ctx.quadraticCurveTo(coords[i].x, coords[i].y, xc, yc)
+    }
+    ctx.quadraticCurveTo(coords[i].x, coords[i].y, coords[i + 1].x, coords[i + 1].y)
     ctx.lineTo(0, height)
     ctx.fill()
   }
