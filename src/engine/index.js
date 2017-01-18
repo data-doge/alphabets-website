@@ -5,6 +5,9 @@ const View = require('./view')
 const Space = require('./space')
 const AudioInterface = require('./audio-interface')
 const round = require('lodash.round')
+const scale = require('scale-number-range')
+
+const exampleData = [40, 21, 94, 213, 125, 68, 18, 126, 229, 58 ]
 
 class Engine {
 
@@ -20,10 +23,11 @@ class Engine {
   }
 
   start () {
+    this.loadMountainRange()
+
     let deg = 0
     let isDay = true
     const lightChangeCountdown = 20
-
     this.space.show()
 
     loop(t => {
@@ -44,6 +48,31 @@ class Engine {
         }
       }
     }).start()
+  }
+
+  loadMountainRange () {
+    const canvas = $('#mountain-range')[0]
+    const width = $(window).width()
+    const height = $(window).height() * 0.5111
+    canvas.width = width
+    canvas.height = height
+    const ctx = canvas.getContext('2d')
+    ctx.fillStyle = 'black'
+    ctx.strokeStyle = 'black'
+
+    let pointYCoords = []
+    exampleData.forEach(y => {
+      pointYCoords.push(y)
+      pointYCoords.push(0)
+    })
+    ctx.beginPath()
+    ctx.moveTo(0, height)
+    pointYCoords.forEach((y, i, arr) => {
+      const x = scale(i + 1, 0, arr.length, 0, width)
+      ctx.lineTo(x, height - 0.5 * y)
+    })
+    ctx.lineTo(0, height)
+    ctx.fill()
   }
 
 }
