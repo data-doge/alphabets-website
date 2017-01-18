@@ -56485,20 +56485,19 @@ class AudioInterface {
     this.analyser = webAudioAnalyser2({
       context: this.ctx,
       fftSize: 2048,
-      equalTemperedFreqBinCount: 10
+      equalTemperedFreqBinCount: 7
     });
     this.out = this.ctx.destination;
 
     this.src.connect(this.analyser);
-    // TODO: uncomment to hear music
-    // this.analyser.connect(this.out)
+    this.analyser.connect(this.out);
     this.audio.play();
   }
 
   measure() {
-    var _analyser$barkScaleFr = this.analyser.barkScaleFrequencyData(),
-        frequencies = _analyser$barkScaleFr.frequencies,
-        overallAmplitude = _analyser$barkScaleFr.overallAmplitude;
+    var _analyser$equalTemper = this.analyser.equalTemperedFrequencyData(7),
+        frequencies = _analyser$equalTemper.frequencies,
+        overallAmplitude = _analyser$equalTemper.overallAmplitude;
 
     return { frequencies: frequencies, overallAmplitude: overallAmplitude };
   }
@@ -56690,9 +56689,7 @@ var View = require('./view');
 var Space = require('./space');
 var AudioInterface = require('./audio-interface');
 var round = require('lodash.round');
-var scale = require('scale-number-range');
-
-var exampleData = [40, 21, 94, 213, 125, 68, 18, 126, 229, 58];
+var MountainRange = require('./mountain-range');
 
 class Engine {
 
@@ -56701,6 +56698,7 @@ class Engine {
     this.view = new View();
     this.space = new Space();
     this.audioInterface = new AudioInterface();
+    this.mountainRange = new MountainRange();
   }
 
   bindEventListeners() {
@@ -56709,8 +56707,6 @@ class Engine {
 
   start() {
     var _this = this;
-
-    this.loadMountainRange();
 
     var deg = 0;
     var isDay = true;
@@ -56722,7 +56718,10 @@ class Engine {
       deg += 0.1;
 
       var _audioInterface$measu = _this.audioInterface.measure(),
-          overallAmplitude = _audioInterface$measu.overallAmplitude;
+          overallAmplitude = _audioInterface$measu.overallAmplitude,
+          frequencies = _audioInterface$measu.frequencies;
+
+      _this.mountainRange.render(frequencies);
 
       _this.space.update(-1 * deg / 180 * Math.PI, overallAmplitude);
       var ticker = 1 * round(deg, 1) % 180;
@@ -56734,54 +56733,87 @@ class Engine {
         if (isDay) {
           _this.view.makeDarker(currentCount, lightChangeCountdown);
           _this.environment.makeLighter(currentCount, lightChangeCountdown);
+          _this.mountainRange.makeLighter(currentCount, lightChangeCountdown);
         } else {
           _this.view.makeLighter(currentCount, lightChangeCountdown);
           _this.environment.makeDarker(currentCount, lightChangeCountdown);
+          _this.mountainRange.makeDarker(currentCount, lightChangeCountdown);
         }
       }
     }).start();
-  }
-
-  loadMountainRange() {
-    var canvas = $('#mountain-range')[0];
-    var width = $(window).width();
-    var height = $(window).height() * 0.5111;
-    canvas.width = width;
-    canvas.height = height;
-    var ctx = canvas.getContext('2d');
-    ctx.fillStyle = 'black';
-    ctx.strokeStyle = 'black';
-
-    var pointYCoords = [];
-    exampleData.forEach(function (y) {
-      pointYCoords.push(y);
-      pointYCoords.push(0);
-    });
-    var coords = pointYCoords.map(function (y, i, arr) {
-      return {
-        x: scale(i + 1, 0, arr.length, 0, width),
-        y: height - 1 * y
-      };
-    });
-
-    ctx.beginPath();
-    ctx.moveTo(0, height);
-    var i = void 0;
-    for (i = 0; i < coords.length - 2; i++) {
-      var xc = (coords[i].x + coords[i + 1].x) / 2;
-      var yc = (coords[i].y + coords[i + 1].y) / 2;
-      ctx.quadraticCurveTo(coords[i].x, coords[i].y, xc, yc);
-    }
-    ctx.quadraticCurveTo(coords[i].x, coords[i].y, coords[i + 1].x, coords[i + 1].y);
-    ctx.lineTo(0, height);
-    ctx.fill();
   }
 
 }
 
 module.exports = Engine;
 
-},{"./audio-interface":30,"./environment":31,"./space":33,"./view":34,"jquery":12,"lodash.round":14,"raf-loop":20,"scale-number-range":23}],33:[function(require,module,exports){
+},{"./audio-interface":30,"./environment":31,"./mountain-range":33,"./space":34,"./view":35,"jquery":12,"lodash.round":14,"raf-loop":20}],33:[function(require,module,exports){
+var $ = require('jquery');
+var scale = require('scale-number-range');
+var convert = require('color-convert');
+
+class MountainRange {
+
+  constructor() {
+    this.canvas = $('#mountain-range')[0];
+    this.ctx = this.canvas.getContext('2d');
+    this.setDimensions();
+    this.ctx.lineWidth = 2;
+    this.strokeStyle = 'black';
+  }
+
+  setDimensions() {
+    this.canvas.width = $(window).width();
+    this.canvas.height = $(window).height() * 0.5111;
+  }
+
+  render(data) {
+    var _this = this;
+
+    var pointYCoords = [];
+    data.forEach(function (y) {
+      pointYCoords.push(y);
+      pointYCoords.push(0);
+    });
+    var coords = pointYCoords.map(function (y, i, arr) {
+      return {
+        x: scale(i + 1, 0, arr.length, 0, _this.canvas.width),
+        y: _this.canvas.height - 1 * y
+      };
+    });
+
+    this.ctx.strokeStyle = this.strokeStyle;
+    this.ctx.beginPath();
+    this.ctx.moveTo(0, this.canvas.height);
+    var i = void 0;
+    for (i = 0; i < coords.length - 2; i++) {
+      var xc = (coords[i].x + coords[i + 1].x) / 2;
+      var yc = (coords[i].y + coords[i + 1].y) / 2;
+      this.ctx.quadraticCurveTo(coords[i].x, coords[i].y, xc, yc);
+    }
+    this.ctx.quadraticCurveTo(coords[i].x, coords[i].y, coords[i + 1].x, coords[i + 1].y);
+    this.ctx.lineTo(0, this.canvas.height);
+    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    this.ctx.stroke();
+  }
+
+  makeDarker(currentCount, totalCount) {
+    var opacity = currentCount / totalCount;
+    var strokeStyle = convert.hsl.hex(0, 0, opacity * 100);
+    this.strokeStyle = '#' + strokeStyle;
+  }
+
+  makeLighter(currentCount, totalCount) {
+    var opacity = currentCount / totalCount;
+    var strokeStyle = convert.hsl.hex(0, 0, (1 - opacity) * 100);
+    this.strokeStyle = '#' + strokeStyle;
+  }
+
+}
+
+module.exports = MountainRange;
+
+},{"color-convert":4,"jquery":12,"scale-number-range":23}],34:[function(require,module,exports){
 var $ = require('jquery');
 
 class Space {
@@ -56819,7 +56851,7 @@ class Space {
 
 module.exports = Space;
 
-},{"jquery":12}],34:[function(require,module,exports){
+},{"jquery":12}],35:[function(require,module,exports){
 var $ = require('jquery');
 var convert = require('color-convert');
 
@@ -56864,11 +56896,11 @@ class View {
 
 module.exports = View;
 
-},{"color-convert":4,"jquery":12}],35:[function(require,module,exports){
+},{"color-convert":4,"jquery":12}],36:[function(require,module,exports){
 var Engine = require('./engine');
 
 var engine = new Engine();
 engine.bindEventListeners();
 engine.start();
 
-},{"./engine":32}]},{},[35]);
+},{"./engine":32}]},{},[36]);
