@@ -80,9 +80,26 @@ a:hover {
   font-weight: 300;
 }
 
+#space-container {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+#space {
+  position: relative;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+}
+
 #sun {
   display: none;
-  position: fixed;
   width: 70px;
   height: 70px;
   border-radius: 50%;
@@ -92,12 +109,9 @@ a:hover {
 
 #moon {
   display: none;
-  position: fixed;
   width: 70px;
   height: 70px;
   border-radius: 50%;
-  bottom: 46%;
-  right: 90px;
   background: white;
   z-index: -20;
 }

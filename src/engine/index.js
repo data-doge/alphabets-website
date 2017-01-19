@@ -32,7 +32,7 @@ class Engine {
       deg += 0.1
       const { overallAmplitude, frequencies } = this.audioInterface.measure()
       this.mountainRange.render(frequencies)
-      
+
       this.space.update(-1 * deg / 180 * Math.PI, overallAmplitude)
       const ticker = 1 * round(deg, 1) % 180
       if (ticker % 180 === 0) { isDay = !isDay }
