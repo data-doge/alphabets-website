@@ -7,9 +7,14 @@ class MountainRange {
   constructor () {
     this.canvas = $('#mountain-range')[0]
     this.ctx = this.canvas.getContext('2d')
-    this.setDimensions()
     this.ctx.lineWidth = 2
     this.strokeStyle = 'black'
+    this.setDimensions()
+    this.bindEventListeners()
+  }
+
+  bindEventListeners () {
+    $(window).resize(this.setDimensions.bind(this))
   }
 
   setDimensions () {
@@ -20,7 +25,7 @@ class MountainRange {
   render (data) {
     let pointYCoords = []
     data.forEach(y => {
-      pointYCoords.push(y)
+      pointYCoords.push(y * this.canvas.height * 0.002)
       pointYCoords.push(0)
     })
     const coords = pointYCoords.map((y, i, arr) => ({
