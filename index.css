@@ -10,6 +10,7 @@ body {
 
 #mountain-range {
   position: fixed;
+  top: 0;
 }
 
 #three-canvas {
@@ -18,42 +19,92 @@ body {
 }
 
 #copy-container {
-  position: fixed;
-  top: 40px;
-  left: 40px;
-  width: 400px;
-  z-index: 10;
+  position: relative;
+  padding: 40px;
   color: black;
+  z-index: 100;
+}
+
+.panel {
+  position: relative;
+  display: none;
+  font-size: 14px;
+}
+
+#audio-panel {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  flex-wrap: wrap;
+  z-index: 1;
+}
+
+#video-panel {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  flex-wrap: wrap;
+  z-index: 1;
+}
+
+.audio-link {
+  display: block;
+}
+
+.album-art {
+  display: block;
+  width: 200px;
+  height: 200px;
+  margin-right: 5px;
+  margin-bottom: 5px;
+}
+
+@media (max-width: 480px) {
+
+  #copy-container {
+    padding: 30px;
+  }
+
+}
+
+.color-transition-copy {
+  background: black;
+  color: white;
 }
 
 h1 {
   font-weight: lighter;
   display: inline-block;
-  background: black;
-  color: white;
   padding: 5px 10px;
   margin: 0;
-  margin-bottom: 7px;
+  margin-bottom: 10px;
 }
 
 p {
+  max-width: 400px;
   font-size: 14px;
+  padding: 3px 5px;
+  margin: 0;
+  margin-bottom: 10px;
 }
 
 ul {
+  margin: 0;
   padding: 0;
+  margin-bottom: 10px;
 }
 
 li {
+  display: inline-block;
   font-size: 14px;
   list-style: none;
-  margin-bottom: 5px;
+  margin-right: 3px;
+  padding: 2px 5px;
 }
 
 a {
   text-decoration: none;
   color: inherit;
-  border-bottom: 1px solid black;
   cursor: pointer;
 }
 
@@ -80,35 +131,39 @@ a:hover {
   font-weight: 300;
 }
 
+#space-container {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: -20;
+}
+
+#space {
+  position: relative;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+}
+
 #sun {
   display: none;
-  position: fixed;
   width: 70px;
   height: 70px;
   border-radius: 50%;
   background: black;
-  z-index: -20;
 }
 
 #moon {
   display: none;
-  position: fixed;
   width: 70px;
   height: 70px;
   border-radius: 50%;
-  bottom: 46%;
-  right: 90px;
   background: white;
-  z-index: -20;
-}
-
-#horizon {
-  height: 1px;
-  background: rgba(0,0,0,0.1);
-  position: fixed;
-  left: 0;
-  right: 0;
-  top: 51.11%;
 }
 
 #ground-overlay {

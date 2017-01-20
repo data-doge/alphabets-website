@@ -6,25 +6,51 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link href="index.css" rel="stylesheet" />
   </head>
+
   <body>
     <div id="copy-container">
-      <h1>Alphabets</h1>
-      <p><em>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</em></p>
+      <h1 class="color-transition-copy"><a id="home">Alphabets</a></h1>
+
+      <p class="color-transition-copy">
+        <em>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</em>
+      </p>
+
       <ul>
-        <li><a href="#">perspiciatis</a></li>
-        <li><a href="#">laboriosam</a></li>
-        <li><a href="#">exercitationem</a></li>
+        <li class="color-transition-copy"><a id="audio">audio</a></li>
+        <li class="color-transition-copy"><a id="video">video</a></li>
+        <li class="color-transition-copy"><a id="merch">merch</a></li>
+        <li class="color-transition-copy"><a id="contact">contact</a></li>
       </ul>
+
+      <div class="panel" id="audio-panel">
+      </div>
+
+      <div class="panel" id="video-panel">
+      </div>
+
+      <div class="panel color-transition-copy" id="merch-panel">
+        merch panel
+      </div>
+
+      <div class="panel color-transition-copy" id="contact-panel">
+        contact panel
+      </div>
+    </div>
+
+    <div id="space-container">
+      <div id="space">
+        <div id="moon"></div>
+        <div id="sun"></div>
+      </div>
     </div>
 
     <canvas id="mountain-range"></canvas>
     <canvas id="three-canvas"></canvas>
-    <div id="horizon"></div>
     <div id="ground-overlay"></div>
 
     <div id="loading-screen">
       <div id="loading-msg" class="vertalign">
-        loading alphabets-website ...
+        loading
       </div>
     </div>
 

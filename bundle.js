@@ -492,7 +492,7 @@ var objectKeys = Object.keys || function (obj) {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"util/":28}],2:[function(require,module,exports){
+},{"util/":29}],2:[function(require,module,exports){
 module.exports = function average(values) {
     'use strict';
     
@@ -1874,7 +1874,7 @@ function localstorage() {
 }
 
 }).call(this,require('_process'))
-},{"./debug":8,"_process":19}],8:[function(require,module,exports){
+},{"./debug":8,"_process":20}],8:[function(require,module,exports){
 
 /**
  * This is the common logic for both the Node.js and web browser
@@ -2075,7 +2075,7 @@ function coerce(val) {
   return val;
 }
 
-},{"ms":17}],9:[function(require,module,exports){
+},{"ms":18}],9:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -12331,6 +12331,168 @@ return jQuery;
  * Copyright Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
  */
 
+/** `Object#toString` result references. */
+var symbolTag = '[object Symbol]';
+
+/** Used for built-in method references. */
+var objectProto = Object.prototype;
+
+/**
+ * Used to resolve the
+ * [`toStringTag`](http://ecma-international.org/ecma-262/6.0/#sec-object.prototype.tostring)
+ * of values.
+ */
+var objectToString = objectProto.toString;
+
+/**
+ * The base implementation of methods like `_.max` and `_.min` which accepts a
+ * `comparator` to determine the extremum value.
+ *
+ * @private
+ * @param {Array} array The array to iterate over.
+ * @param {Function} iteratee The iteratee invoked per iteration.
+ * @param {Function} comparator The comparator used to compare values.
+ * @returns {*} Returns the extremum value.
+ */
+function baseExtremum(array, iteratee, comparator) {
+  var index = -1,
+      length = array.length;
+
+  while (++index < length) {
+    var value = array[index],
+        current = iteratee(value);
+
+    if (current != null && (computed === undefined
+          ? (current === current && !isSymbol(current))
+          : comparator(current, computed)
+        )) {
+      var computed = current,
+          result = value;
+    }
+  }
+  return result;
+}
+
+/**
+ * The base implementation of `_.lt` which doesn't coerce arguments to numbers.
+ *
+ * @private
+ * @param {*} value The value to compare.
+ * @param {*} other The other value to compare.
+ * @returns {boolean} Returns `true` if `value` is less than `other`,
+ *  else `false`.
+ */
+function baseLt(value, other) {
+  return value < other;
+}
+
+/**
+ * Checks if `value` is object-like. A value is object-like if it's not `null`
+ * and has a `typeof` result of "object".
+ *
+ * @static
+ * @memberOf _
+ * @since 4.0.0
+ * @category Lang
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is object-like, else `false`.
+ * @example
+ *
+ * _.isObjectLike({});
+ * // => true
+ *
+ * _.isObjectLike([1, 2, 3]);
+ * // => true
+ *
+ * _.isObjectLike(_.noop);
+ * // => false
+ *
+ * _.isObjectLike(null);
+ * // => false
+ */
+function isObjectLike(value) {
+  return !!value && typeof value == 'object';
+}
+
+/**
+ * Checks if `value` is classified as a `Symbol` primitive or object.
+ *
+ * @static
+ * @memberOf _
+ * @since 4.0.0
+ * @category Lang
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is correctly classified,
+ *  else `false`.
+ * @example
+ *
+ * _.isSymbol(Symbol.iterator);
+ * // => true
+ *
+ * _.isSymbol('abc');
+ * // => false
+ */
+function isSymbol(value) {
+  return typeof value == 'symbol' ||
+    (isObjectLike(value) && objectToString.call(value) == symbolTag);
+}
+
+/**
+ * This method returns the first argument given to it.
+ *
+ * @static
+ * @since 0.1.0
+ * @memberOf _
+ * @category Util
+ * @param {*} value Any value.
+ * @returns {*} Returns `value`.
+ * @example
+ *
+ * var object = { 'user': 'fred' };
+ *
+ * _.identity(object) === object;
+ * // => true
+ */
+function identity(value) {
+  return value;
+}
+
+/**
+ * Computes the minimum value of `array`. If `array` is empty or falsey,
+ * `undefined` is returned.
+ *
+ * @static
+ * @since 0.1.0
+ * @memberOf _
+ * @category Math
+ * @param {Array} array The array to iterate over.
+ * @returns {*} Returns the minimum value.
+ * @example
+ *
+ * _.min([4, 2, 8, 6]);
+ * // => 2
+ *
+ * _.min([]);
+ * // => undefined
+ */
+function min(array) {
+  return (array && array.length)
+    ? baseExtremum(array, identity, baseLt)
+    : undefined;
+}
+
+module.exports = min;
+
+},{}],14:[function(require,module,exports){
+/**
+ * lodash (Custom Build) <https://lodash.com/>
+ * Build: `lodash modularize exports="npm" -o ./`
+ * Copyright jQuery Foundation and other contributors <https://jquery.org/>
+ * Released under MIT license <https://lodash.com/license>
+ * Based on Underscore.js 1.8.3 <http://underscorejs.org/LICENSE>
+ * Copyright Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ */
+
 /** Used as references for various `Number` constants. */
 var INFINITY = 1 / 0,
     MAX_SAFE_INTEGER = 9007199254740991,
@@ -12785,7 +12947,7 @@ var range = createRange();
 
 module.exports = range;
 
-},{}],14:[function(require,module,exports){
+},{}],15:[function(require,module,exports){
 (function (global){
 /**
  * lodash (Custom Build) <https://lodash.com/>
@@ -13136,7 +13298,7 @@ var round = createRound('round');
 module.exports = round;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],15:[function(require,module,exports){
+},{}],16:[function(require,module,exports){
 /**
  * lodash (Custom Build) <https://lodash.com/>
  * Build: `lodash modularize exports="npm" -o ./`
@@ -13641,7 +13803,7 @@ function values(object) {
 
 module.exports = sample;
 
-},{}],16:[function(require,module,exports){
+},{}],17:[function(require,module,exports){
 /**
  * Constructor
  * @param {Number} minValue
@@ -13702,7 +13864,7 @@ LogScale.prototype.logarithmicToLinear = function(value) {
 
 module.exports = LogScale;
 
-},{}],17:[function(require,module,exports){
+},{}],18:[function(require,module,exports){
 /**
  * Helpers.
  */
@@ -13853,7 +14015,7 @@ function plural(ms, n, name) {
   return Math.ceil(ms / n) + ' ' + name + 's'
 }
 
-},{}],18:[function(require,module,exports){
+},{}],19:[function(require,module,exports){
 (function (process){
 // Generated by CoffeeScript 1.7.1
 (function() {
@@ -13889,7 +14051,7 @@ function plural(ms, n, name) {
 }).call(this);
 
 }).call(this,require('_process'))
-},{"_process":19}],19:[function(require,module,exports){
+},{"_process":20}],20:[function(require,module,exports){
 // shim for using process in browser
 var process = module.exports = {};
 
@@ -14071,7 +14233,7 @@ process.chdir = function (dir) {
 };
 process.umask = function() { return 0; };
 
-},{}],20:[function(require,module,exports){
+},{}],21:[function(require,module,exports){
 var inherits = require('inherits')
 var EventEmitter = require('events').EventEmitter
 var now = require('right-now')
@@ -14116,7 +14278,7 @@ Engine.prototype.tick = function() {
     this.emit('tick', dt)
     this.last = time
 }
-},{"events":9,"inherits":11,"raf":21,"right-now":22}],21:[function(require,module,exports){
+},{"events":9,"inherits":11,"raf":22,"right-now":23}],22:[function(require,module,exports){
 (function (global){
 var now = require('performance-now')
   , root = typeof window === 'undefined' ? global : window
@@ -14192,7 +14354,7 @@ module.exports.polyfill = function() {
 }
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"performance-now":18}],22:[function(require,module,exports){
+},{"performance-now":19}],23:[function(require,module,exports){
 (function (global){
 module.exports =
   global.performance &&
@@ -14203,7 +14365,7 @@ module.exports =
   }
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],23:[function(require,module,exports){
+},{}],24:[function(require,module,exports){
 (function (process){
 /**
  * simple module to scale a number from one range to another
@@ -14225,7 +14387,7 @@ module.exports = function scaleNumberRange(number, oldMin, oldMax, newMin, newMa
 }
 
 }).call(this,require('_process'))
-},{"_process":19,"debug":7}],24:[function(require,module,exports){
+},{"_process":20,"debug":7}],25:[function(require,module,exports){
 module.exports = function (renderer, camera, dimension) {
 
   /**
@@ -14268,7 +14430,7 @@ module.exports = function (renderer, camera, dimension) {
 
 }
 
-},{}],25:[function(require,module,exports){
+},{}],26:[function(require,module,exports){
 var self = self || {};// File:src/Three.js
 
 /**
@@ -55790,16 +55952,16 @@ if (typeof exports !== 'undefined') {
   this['THREE'] = THREE;
 }
 
-},{}],26:[function(require,module,exports){
+},{}],27:[function(require,module,exports){
 arguments[4][11][0].apply(exports,arguments)
-},{"dup":11}],27:[function(require,module,exports){
+},{"dup":11}],28:[function(require,module,exports){
 module.exports = function isBuffer(arg) {
   return arg && typeof arg === 'object'
     && typeof arg.copy === 'function'
     && typeof arg.fill === 'function'
     && typeof arg.readUInt8 === 'function';
 }
-},{}],28:[function(require,module,exports){
+},{}],29:[function(require,module,exports){
 (function (process,global){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -56389,7 +56551,7 @@ function hasOwnProperty(obj, prop) {
 }
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./support/isBuffer":27,"_process":19,"inherits":26}],29:[function(require,module,exports){
+},{"./support/isBuffer":28,"_process":20,"inherits":27}],30:[function(require,module,exports){
 var LogScale = require('log-scale')
 var range = require('lodash.range')
 var average = require('average')
@@ -56472,7 +56634,7 @@ var webAudioAnalyser2 = function (params) {
 
 module.exports = webAudioAnalyser2
 
-},{"average":2,"get-closest":10,"lodash.range":13,"log-scale":16}],30:[function(require,module,exports){
+},{"average":2,"get-closest":10,"lodash.range":14,"log-scale":17}],31:[function(require,module,exports){
 var $ = require('jquery');
 var webAudioAnalyser2 = require('web-audio-analyser-2');
 
@@ -56490,7 +56652,7 @@ class AudioInterface {
     this.out = this.ctx.destination;
 
     this.src.connect(this.analyser);
-    this.analyser.connect(this.out);
+    // this.analyser.connect(this.out)
     this.audio.play();
   }
 
@@ -56505,7 +56667,7 @@ class AudioInterface {
 
 module.exports = AudioInterface;
 
-},{"jquery":12,"web-audio-analyser-2":29}],31:[function(require,module,exports){
+},{"jquery":12,"web-audio-analyser-2":30}],32:[function(require,module,exports){
 var THREE = require('three');
 var Scene = THREE.Scene,
     PerspectiveCamera = THREE.PerspectiveCamera,
@@ -56681,7 +56843,7 @@ class Environment {
 
 module.exports = Environment;
 
-},{"jquery":12,"lodash.range":13,"lodash.round":14,"lodash.sample":15,"three":25,"three-window-resize":24}],32:[function(require,module,exports){
+},{"jquery":12,"lodash.range":14,"lodash.round":15,"lodash.sample":16,"three":26,"three-window-resize":25}],33:[function(require,module,exports){
 var $ = require('jquery');
 var loop = require('raf-loop');
 var Environment = require('./environment');
@@ -56747,7 +56909,7 @@ class Engine {
 
 module.exports = Engine;
 
-},{"./audio-interface":30,"./environment":31,"./mountain-range":33,"./space":34,"./view":35,"jquery":12,"lodash.round":14,"raf-loop":20}],33:[function(require,module,exports){
+},{"./audio-interface":31,"./environment":32,"./mountain-range":34,"./space":35,"./view":36,"jquery":12,"lodash.round":15,"raf-loop":21}],34:[function(require,module,exports){
 var $ = require('jquery');
 var scale = require('scale-number-range');
 var convert = require('color-convert');
@@ -56757,9 +56919,14 @@ class MountainRange {
   constructor() {
     this.canvas = $('#mountain-range')[0];
     this.ctx = this.canvas.getContext('2d');
-    this.setDimensions();
     this.ctx.lineWidth = 2;
     this.strokeStyle = 'black';
+    this.setDimensions();
+    this.bindEventListeners();
+  }
+
+  bindEventListeners() {
+    $(window).resize(this.setDimensions.bind(this));
   }
 
   setDimensions() {
@@ -56772,7 +56939,7 @@ class MountainRange {
 
     var pointYCoords = [];
     data.forEach(function (y) {
-      pointYCoords.push(y);
+      pointYCoords.push(y * _this.canvas.height * 0.002);
       pointYCoords.push(0);
     });
     var coords = pointYCoords.map(function (y, i, arr) {
@@ -56813,18 +56980,28 @@ class MountainRange {
 
 module.exports = MountainRange;
 
-},{"color-convert":4,"jquery":12,"scale-number-range":23}],34:[function(require,module,exports){
+},{"color-convert":4,"jquery":12,"scale-number-range":24}],35:[function(require,module,exports){
 var $ = require('jquery');
+var min = require('lodash.min');
 
 class Space {
 
   constructor() {
-    this.$sun = $('<div id="sun"></div>');
-    this.$moon = $('<div id="moon"></div>');
-    $('body').append(this.$sun);
-    $('body').append(this.$moon);
-    this.a = 500;
-    this.b = 300;
+    this.$space = $('#space');
+    this.setSpaceContainerSize();
+    this.$sun = $('#sun');
+    this.$moon = $('#moon');
+    this.bindEventListeners();
+  }
+
+  bindEventListeners() {
+    $(window).resize(this.setSpaceContainerSize.bind(this));
+  }
+
+  setSpaceContainerSize() {
+    this.spaceSize = min([$(window).width(), $(window).height()]);
+    this.$space.width(this.spaceSize);
+    this.$space.height(this.spaceSize);
   }
 
   show() {
@@ -56832,18 +57009,19 @@ class Space {
     this.$moon.show();
   }
 
-  update(theta, diameter) {
+  update(theta, loudness) {
+    var diameter = loudness / 255 * this.spaceSize * 0.25;
     var centerX = $(window).width() / 2 - diameter / 2;
     var centerY = $(window).height() / 2 - diameter / 2;
     this.$sun.css({ width: diameter, height: diameter });
     this.$moon.css({ width: diameter, height: diameter });
     this.$sun.offset({
-      top: centerY + this.b * Math.sin(theta),
-      left: centerX + this.a * Math.cos(theta)
+      top: centerY + this.spaceSize / 2 * Math.sin(theta),
+      left: centerX + this.spaceSize / 2 * Math.cos(theta)
     });
     this.$moon.offset({
-      top: centerY + this.b * Math.sin(theta + Math.PI),
-      left: centerX + this.a * Math.cos(theta + Math.PI)
+      top: centerY + this.spaceSize / 2 * Math.sin(theta + Math.PI),
+      left: centerX + this.spaceSize / 2 * Math.cos(theta + Math.PI)
     });
   }
 
@@ -56851,7 +57029,7 @@ class Space {
 
 module.exports = Space;
 
-},{"jquery":12}],35:[function(require,module,exports){
+},{"jquery":12,"lodash.min":13}],36:[function(require,module,exports){
 var $ = require('jquery');
 var convert = require('color-convert');
 
@@ -56860,10 +57038,49 @@ class View {
   constructor() {
     this.textHex = 'FFFFFF';
     this.backgroundHex = '000000';
+    this.bindEventListeners();
+  }
+
+  populateAudioPanel() {
+    var html = [{ imgUrl: 'https://f4.bcbits.com/img/a3247042134_2.jpg', bcUrl: 'https://lotsoflettershere.bandcamp.com/album/dead-beat-til-i-die', title: 'dead//beat til i die' }, { imgUrl: 'https://f4.bcbits.com/img/a3287578958_2.jpg', bcUrl: 'https://lotsoflettershere.bandcamp.com/album/steeping', title: 'steeping' }, { imgUrl: 'https://f4.bcbits.com/img/a2557375228_2.jpg', bcUrl: 'https://lotsoflettershere.bandcamp.com/album/motionless', title: 'motionless' }, { imgUrl: 'https://f4.bcbits.com/img/a2361122322_2.jpg', bcUrl: 'https://lotsoflettershere.bandcamp.com/album/stress', title: 'stress' }, { imgUrl: 'https://f4.bcbits.com/img/a3136442865_2.jpg', bcUrl: 'https://lotsoflettershere.bandcamp.com/album/low-vibes', title: 'low vibes' }, { imgUrl: 'https://f4.bcbits.com/img/a0412213850_2.jpg', bcUrl: 'https://lotsoflettershere.bandcamp.com/album/untitled-ep-4', title: 'untitled ep4' }, { imgUrl: 'https://f4.bcbits.com/img/a1343068421_2.jpg', bcUrl: 'https://lotsoflettershere.bandcamp.com/album/untitled-ep-3', title: 'untitled ep3' }, { imgUrl: 'https://f4.bcbits.com/img/a1637662097_2.jpg', bcUrl: 'https://lotsoflettershere.bandcamp.com/album/takes-the-air', title: 'takes the air' }, { imgUrl: 'https://f4.bcbits.com/img/a3163431488_2.jpg', bcUrl: 'https://lotsoflettershere.bandcamp.com/album/untitled-ep-2', title: 'untitled ep 2' }, { imgUrl: 'https://f4.bcbits.com/img/a2362660752_2.jpg', bcUrl: 'https://lotsoflettershere.bandcamp.com/album/untitled-ep', title: 'untitled ep' }, { imgUrl: 'https://f4.bcbits.com/img/a0499335438_2.jpg', bcUrl: 'https://lotsoflettershere.bandcamp.com/album/thought-loop', title: 'thought loop' }, { imgUrl: 'https://f4.bcbits.com/img/a0500555093_2.jpg', bcUrl: 'https://lotsoflettershere.bandcamp.com/album/hfpn011-a-long-interval-marked-by-nothing-of-distinguished-note', title: '(HFPN011) a long interval, marked by nothing of distinguished note' }, { imgUrl: 'https://f4.bcbits.com/img/a2317249876_2.jpg', bcUrl: 'https://lotsoflettershere.bandcamp.com/album/cold-heart-warm', title: 'cold/heart\\warm' }, { imgUrl: 'https://f4.bcbits.com/img/a3290534802_2.jpg', bcUrl: 'https://lotsoflettershere.bandcamp.com/album/music-to-watch-clouds-with', title: 'music to watch clouds with' }, { imgUrl: 'https://f4.bcbits.com/img/a3201699299_2.jpg', bcUrl: 'https://lotsoflettershere.bandcamp.com/album/so-long-blue-skies', title: '(so long) blue skies' }, { imgUrl: 'https://f4.bcbits.com/img/a4109433261_2.jpg', bcUrl: 'https://lotsoflettershere.bandcamp.com/album/view', title: 'view' }, { imgUrl: 'https://f4.bcbits.com/img/a4085011476_2.jpg', bcUrl: 'https://lotsoflettershere.bandcamp.com/album/ilo', title: 'ilo' }, { imgUrl: 'https://f4.bcbits.com/img/a2870091575_2.jpg', bcUrl: 'https://lotsoflettershere.bandcamp.com/album/well', title: 'well' }, { imgUrl: 'https://f4.bcbits.com/img/a0329685018_2.jpg', bcUrl: 'https://lotsoflettershere.bandcamp.com/album/-', title: '...' }, { imgUrl: 'https://f4.bcbits.com/img/a2153041237_2.jpg', bcUrl: 'https://lotsoflettershere.bandcamp.com/album/styrofoam-sleep', title: 'Styrofoam Sleep' }, { imgUrl: 'https://f4.bcbits.com/img/a1789288278_2.jpg', bcUrl: 'https://lotsoflettershere.bandcamp.com/album/red-oak-intermodulation', title: 'Red Oak Intermodulation' }, { imgUrl: 'https://f4.bcbits.com/img/a4058127069_2.jpg', bcUrl: 'https://lotsoflettershere.bandcamp.com/album/um-ah', title: 'Um / Ah' }, { imgUrl: 'https://f4.bcbits.com/img/a1942401491_2.jpg', bcUrl: 'https://lotsoflettershere.bandcamp.com/album/oh-people', title: 'Oh [people]' }].map(function (_ref) {
+      var imgUrl = _ref.imgUrl,
+          bcUrl = _ref.bcUrl,
+          title = _ref.title;
+
+      return '\n        <a href=' + bcUrl + ' class="album-link" target="_blank">\n          <img class="album-art" src=' + imgUrl + ' />\n        </a>\n      ';
+    });
+    $('#audio-panel').html(html);
+  }
+
+  populateVideoPanel() {
+    var html = [{ gifUrl: './media/0.gif', videoUrl: 'https://www.youtube.com/watch?v=AP8x8An1lL0' }, { gifUrl: './media/1.gif', videoUrl: 'https://www.youtube.com/watch?v=x2krBemxX_Y' }, { gifUrl: './media/2.gif', videoUrl: 'https://www.youtube.com/watch?v=qc38Qvsx8j8' }, { gifUrl: './media/3.gif', videoUrl: 'https://www.youtube.com/watch?v=AEgHP-3NxVc' }, { gifUrl: './media/4.gif', videoUrl: 'https://www.youtube.com/watch?v=KSQg9QKvstE' }].map(function (_ref2) {
+      var gifUrl = _ref2.gifUrl,
+          videoUrl = _ref2.videoUrl;
+
+      return '\n        <a href=' + videoUrl + ' class="album-link" target="_blank">\n          <img class="album-art" src=' + gifUrl + ' />\n        </a>\n      ';
+    });
+    $('#video-panel').html(html);
   }
 
   closeLoadingScreen() {
     $('#loading-screen').hide();
+  }
+
+  bindEventListeners() {
+    $('a').on('click', this.handleLinkClick.bind(this));
+  }
+
+  handleLinkClick(e) {
+    e.preventDefault();
+    var id = e.target.id;
+    if (id === 'audio') {
+      this.populateAudioPanel();
+    }
+    if (id === 'video') {
+      this.populateVideoPanel();
+    }
+    $('.panel').hide();
+    $('#' + id + '-panel').show();
   }
 
   makeDarker(currentCount, totalCount) {
@@ -56887,20 +57104,18 @@ class View {
   renderColors() {
     $('body').css({ background: '#' + this.backgroundHex });
     $('#ground-overlay').css({ background: '#' + this.backgroundHex });
-    $('#copy-container').css({ color: '#' + this.textHex });
-    $('h1').css({ background: '#' + this.textHex, color: '#' + this.backgroundHex });
-    $('a').css({ borderColor: '#' + this.textHex });
+    $('.color-transition-copy').css({ background: '#' + this.textHex, color: '#' + this.backgroundHex });
   }
 
 }
 
 module.exports = View;
 
-},{"color-convert":4,"jquery":12}],36:[function(require,module,exports){
+},{"color-convert":4,"jquery":12}],37:[function(require,module,exports){
 var Engine = require('./engine');
 
 var engine = new Engine();
 engine.bindEventListeners();
 engine.start();
 
-},{"./engine":32}]},{},[36]);
+},{"./engine":33}]},{},[37]);
