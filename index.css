@@ -19,12 +19,36 @@ body {
 }
 
 #copy-container {
-  position: fixed;
-  top: 0; bottom: 0; left: 0; right: 0;
+  position: relative;
   padding: 40px;
-  max-width: 400px;
-  z-index: 10;
   color: black;
+  z-index: 100;
+}
+
+.panel {
+  position: relative;
+  display: none;
+  font-size: 14px;
+}
+
+#audio-panel {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  flex-wrap: wrap;
+  z-index: 1;
+}
+
+.audio-link {
+  display: block;
+}
+
+.album-art {
+  display: block;
+  width: 200px;
+  height: 200px;
+  margin-right: 5px;
+  margin-bottom: 5px;
 }
 
 @media (max-width: 480px) {
@@ -49,6 +73,7 @@ h1 {
 }
 
 p {
+  max-width: 400px;
   font-size: 14px;
   padding: 3px 5px;
   margin: 0;
@@ -58,6 +83,7 @@ p {
 ul {
   margin: 0;
   padding: 0;
+  margin-bottom: 10px;
 }
 
 li {
