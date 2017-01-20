@@ -10,6 +10,7 @@ body {
 
 #mountain-range {
   position: fixed;
+  top: 0;
 }
 
 #three-canvas {
@@ -19,41 +20,57 @@ body {
 
 #copy-container {
   position: fixed;
-  top: 40px;
-  left: 40px;
-  width: 400px;
+  top: 0; bottom: 0; left: 0; right: 0;
+  padding: 40px;
+  max-width: 400px;
   z-index: 10;
   color: black;
+}
+
+@media (max-width: 480px) {
+
+  #copy-container {
+    padding: 30px;
+  }
+
+}
+
+.color-transition-copy {
+  background: black;
+  color: white;
 }
 
 h1 {
   font-weight: lighter;
   display: inline-block;
-  background: black;
-  color: white;
   padding: 5px 10px;
   margin: 0;
-  margin-bottom: 7px;
+  margin-bottom: 10px;
 }
 
 p {
   font-size: 14px;
+  padding: 3px 5px;
+  margin: 0;
+  margin-bottom: 10px;
 }
 
 ul {
+  margin: 0;
   padding: 0;
 }
 
 li {
+  display: inline-block;
   font-size: 14px;
   list-style: none;
-  margin-bottom: 5px;
+  margin-right: 3px;
+  padding: 2px 5px;
 }
 
 a {
   text-decoration: none;
   color: inherit;
-  border-bottom: 1px solid black;
   cursor: pointer;
 }
 

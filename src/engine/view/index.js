@@ -33,9 +33,7 @@ class View {
   renderColors () {
     $('body').css({ background: `#${this.backgroundHex}` })
     $('#ground-overlay').css({ background: `#${this.backgroundHex}` })
-    $('#copy-container').css({ color: `#${this.textHex}` })
-    $('h1').css({ background: `#${this.textHex}`, color: `#${this.backgroundHex}` })
-    $('a').css({ borderColor: `#${this.textHex}` })
+    $('.color-transition-copy').css({ background: `#${this.textHex}`, color: `#${this.backgroundHex}` })
   }
 
 }

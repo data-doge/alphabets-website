@@ -15,7 +15,7 @@ class AudioInterface {
     this.out = this.ctx.destination
 
     this.src.connect(this.analyser)
-    this.analyser.connect(this.out)
+    // this.analyser.connect(this.out)
     this.audio.play()
   }
 
