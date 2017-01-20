@@ -7,7 +7,6 @@ class View {
     this.textHex = 'FFFFFF'
     this.backgroundHex = '000000'
     this.bindEventListeners()
-    this.populateAudioPanel()
   }
 
   populateAudioPanel () {
@@ -37,13 +36,29 @@ class View {
       { imgUrl: 'https://f4.bcbits.com/img/a1942401491_2.jpg', bcUrl: 'https://lotsoflettershere.bandcamp.com/album/oh-people', title: 'Oh [people]' }
     ].map(({ imgUrl, bcUrl, title }) => {
       return `
-        <a href=${bcUrl} class="album-link">
+        <a href=${bcUrl} class="album-link" target="_blank">
           <img class="album-art" src=${imgUrl} />
         </a>
       `
     })
     $('#audio-panel').html(html)
-    $('#audio-panel').hide()
+  }
+
+  populateVideoPanel () {
+    const html = [
+      { gifUrl: './media/0.gif', videoUrl: 'https://www.youtube.com/watch?v=AP8x8An1lL0' },
+      { gifUrl: './media/1.gif', videoUrl: 'https://www.youtube.com/watch?v=x2krBemxX_Y' },
+      { gifUrl: './media/2.gif', videoUrl: 'https://www.youtube.com/watch?v=qc38Qvsx8j8' },
+      { gifUrl: './media/3.gif', videoUrl: 'https://www.youtube.com/watch?v=AEgHP-3NxVc' },
+      { gifUrl: './media/4.gif', videoUrl: 'https://www.youtube.com/watch?v=KSQg9QKvstE' }
+    ].map(({ gifUrl, videoUrl }) => {
+      return `
+        <a href=${videoUrl} class="album-link" target="_blank">
+          <img class="album-art" src=${gifUrl} />
+        </a>
+      `
+    })
+    $('#video-panel').html(html)
   }
 
   closeLoadingScreen () {
@@ -56,8 +71,11 @@ class View {
 
   handleLinkClick (e) {
     e.preventDefault()
+    const id = e.target.id
+    if (id === 'audio') { this.populateAudioPanel() }
+    if (id === 'video') { this.populateVideoPanel() }
     $('.panel').hide()
-    $(`#${e.target.id}-panel`).show()
+    $(`#${id}-panel`).show()
   }
 
   makeDarker (currentCount, totalCount) {

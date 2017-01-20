@@ -39,6 +39,14 @@ body {
   z-index: 1;
 }
 
+#video-panel {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  flex-wrap: wrap;
+  z-index: 1;
+}
+
 .audio-link {
   display: block;
 }
