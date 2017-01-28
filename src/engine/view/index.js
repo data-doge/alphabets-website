@@ -100,6 +100,7 @@ class View {
     $('body').css({ background: `#${this.backgroundHex}` })
     $('#ground-overlay').css({ background: `#${this.backgroundHex}` })
     $('.color-transition-copy').css({ background: `#${this.textHex}`, color: `#${this.backgroundHex}` })
+    $('.audio-control').css({ color: `#${this.textHex}` })
   }
 
 }

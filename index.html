@@ -4,12 +4,19 @@
     <meta charset="utf-8" />
     <title>alphabets-website</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <link href="index.css" rel="stylesheet" />
+    <link href="./css/index.css" rel="stylesheet" />
+    <link href="./css/font-awesome.min.css" rel="stylesheet" />
   </head>
 
   <body>
     <div id="copy-container">
-      <h1 class="color-transition-copy"><a id="home">Alphabets</a></h1>
+      <div id="header-container">
+        <h1 id="header" class="color-transition-copy"><a id="home">Alphabets</a></h1>
+        <i class="fa fa-step-backward audio-control" id="step-backward"></i>
+        <i class="fa fa-step-forward audio-control" id="step-forward"></i>
+        <i class="fa fa-pause audio-control" id="pause"></i>
+        <i class="fa fa-play audio-control" id="play"></i>
+      </div>
 
       <p class="color-transition-copy">
         <em>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</em>
@@ -54,7 +61,11 @@
       </div>
     </div>
 
-    <audio loop="true" src="./media/untitled.mp3"></audio>
+    <audio id="track-0" src="./media/track-0.mp3"></audio>
+    <audio id="track-1" src="./media/track-1.mp3"></audio>
+    <audio id="track-2" src="./media/track-2.mp3"></audio>
+    <audio id="track-3" src="./media/track-3.mp3"></audio>
+    <audio id="track-4" src="./media/track-4.mp3"></audio>
 
     <script src="bundle.js"></script>
   </body>

@@ -8,6 +8,26 @@ body {
   font-family: sans-serif;
 }
 
+#header-container {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+#header {
+  margin: 0;
+}
+
+.audio-control {
+  margin-left: 20px;
+  cursor: pointer;
+}
+
+#pause {
+  display: none;
+}
+
 #mountain-range {
   position: fixed;
   top: 0;
