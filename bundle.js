@@ -492,7 +492,7 @@ var objectKeys = Object.keys || function (obj) {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"util/":29}],2:[function(require,module,exports){
+},{"util/":30}],2:[function(require,module,exports){
 module.exports = function average(values) {
     'use strict';
     
@@ -1145,12 +1145,20 @@ convert.rgb.hex = function (args) {
 };
 
 convert.hex.rgb = function (args) {
-	var match = args.toString(16).match(/[a-f0-9]{6}/i);
+	var match = args.toString(16).match(/[a-f0-9]{6}|[a-f0-9]{3}/i);
 	if (!match) {
 		return [0, 0, 0];
 	}
 
-	var integer = parseInt(match[0], 16);
+	var colorString = match[0];
+
+	if (match[0].length === 3) {
+		colorString = colorString.split('').map(function (char) {
+			return char + char;
+		}).join('');
+	}
+
+	var integer = parseInt(colorString, 16);
 	var r = (integer >> 16) & 0xFF;
 	var g = (integer >> 8) & 0xFF;
 	var b = integer & 0xFF;
@@ -14366,6 +14374,32 @@ module.exports =
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{}],24:[function(require,module,exports){
+'use strict';
+
+module.exports = rotate;
+function rotate(array, num) {
+    num = (num || 0) % array.length;
+    if (num < 0) {
+        num += array.length;
+    }
+    var removed = array.splice(0, num);
+    array.push.apply(array, removed);
+    return array;
+}
+
+module.exports.all = all;
+function all(array) {
+    var clone = array.slice();
+    var rotations = [];
+    var n;
+    for (n = 0; n < clone.length; n++) {
+        rotations.push(clone.slice());
+        rotate(clone, 1);
+    }
+    return rotations;
+}
+
+},{}],25:[function(require,module,exports){
 (function (process){
 /**
  * simple module to scale a number from one range to another
@@ -14387,7 +14421,7 @@ module.exports = function scaleNumberRange(number, oldMin, oldMax, newMin, newMa
 }
 
 }).call(this,require('_process'))
-},{"_process":20,"debug":7}],25:[function(require,module,exports){
+},{"_process":20,"debug":7}],26:[function(require,module,exports){
 module.exports = function (renderer, camera, dimension) {
 
   /**
@@ -14430,7 +14464,7 @@ module.exports = function (renderer, camera, dimension) {
 
 }
 
-},{}],26:[function(require,module,exports){
+},{}],27:[function(require,module,exports){
 var self = self || {};// File:src/Three.js
 
 /**
@@ -55952,16 +55986,16 @@ if (typeof exports !== 'undefined') {
   this['THREE'] = THREE;
 }
 
-},{}],27:[function(require,module,exports){
+},{}],28:[function(require,module,exports){
 arguments[4][11][0].apply(exports,arguments)
-},{"dup":11}],28:[function(require,module,exports){
+},{"dup":11}],29:[function(require,module,exports){
 module.exports = function isBuffer(arg) {
   return arg && typeof arg === 'object'
     && typeof arg.copy === 'function'
     && typeof arg.fill === 'function'
     && typeof arg.readUInt8 === 'function';
 }
-},{}],29:[function(require,module,exports){
+},{}],30:[function(require,module,exports){
 (function (process,global){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -56551,7 +56585,7 @@ function hasOwnProperty(obj, prop) {
 }
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./support/isBuffer":28,"_process":20,"inherits":27}],30:[function(require,module,exports){
+},{"./support/isBuffer":29,"_process":20,"inherits":28}],31:[function(require,module,exports){
 var LogScale = require('log-scale')
 var range = require('lodash.range')
 var average = require('average')
@@ -56634,26 +56668,41 @@ var webAudioAnalyser2 = function (params) {
 
 module.exports = webAudioAnalyser2
 
-},{"average":2,"get-closest":10,"lodash.range":14,"log-scale":17}],31:[function(require,module,exports){
+},{"average":2,"get-closest":10,"lodash.range":14,"log-scale":17}],32:[function(require,module,exports){
 var $ = require('jquery');
 var webAudioAnalyser2 = require('web-audio-analyser-2');
+var range = require('lodash.range');
+var audioIds = range(5).map(function (i) {
+  return '#track-' + i;
+});
+var rotate = require('rotate-array');
 
 class AudioInterface {
 
   constructor() {
-    this.audio = $('audio')[0];
+    var _this = this;
+
+    this.currentAudioIdIndex = 0;
     this.ctx = new (window.AudioContext || window.webkitAudioContext)();
-    this.src = this.ctx.createMediaElementSource(this.audio);
+    this.sources = audioIds.map(function (id) {
+      return _this.ctx.createMediaElementSource($(id)[0]);
+    });
     this.analyser = webAudioAnalyser2({
       context: this.ctx,
       fftSize: 2048,
       equalTemperedFreqBinCount: 7
     });
     this.out = this.ctx.destination;
-
-    this.src.connect(this.analyser);
+    this.currentSource().connect(this.analyser);
     this.analyser.connect(this.out);
-    this.audio.play();
+    this.bindEventListeners();
+  }
+
+  bindEventListeners() {
+    $('#step-backward').click(this.stepBackward.bind(this));
+    $('#pause').click(this.pause.bind(this));
+    $('#play').click(this.play.bind(this));
+    $('#step-forward').click(this.stepForward.bind(this));
   }
 
   measure() {
@@ -56663,11 +56712,50 @@ class AudioInterface {
 
     return { frequencies: frequencies, overallAmplitude: overallAmplitude };
   }
+
+  currentSource() {
+    return this.sources[0];
+  }
+
+  currentAudio() {
+    return this.currentSource().mediaElement;
+  }
+
+  stepBackward() {
+    if (this.currentAudio().paused) {
+      this.sources = rotate(this.sources, -1);
+      this.currentSource().connect(this.analyser);
+    } else {
+      this.pause();
+      this.currentAudio().currentTime = 0;
+    }
+  }
+
+  pause() {
+    $('#pause').hide();
+    $('#play').show();
+    this.currentAudio().pause();
+  }
+
+  play() {
+    $('#play').hide();
+    $('#pause').show();
+    this.currentAudio().play();
+  }
+
+  stepForward() {
+    this.pause();
+    this.currentAudio().currentTime = 0;
+    this.sources = rotate(this.sources, 1);
+    this.currentSource().connect(this.analyser);
+    this.play();
+  }
+
 }
 
 module.exports = AudioInterface;
 
-},{"jquery":12,"web-audio-analyser-2":30}],32:[function(require,module,exports){
+},{"jquery":12,"lodash.range":14,"rotate-array":24,"web-audio-analyser-2":31}],33:[function(require,module,exports){
 var THREE = require('three');
 var Scene = THREE.Scene,
     PerspectiveCamera = THREE.PerspectiveCamera,
@@ -56843,7 +56931,7 @@ class Environment {
 
 module.exports = Environment;
 
-},{"jquery":12,"lodash.range":14,"lodash.round":15,"lodash.sample":16,"three":26,"three-window-resize":25}],33:[function(require,module,exports){
+},{"jquery":12,"lodash.range":14,"lodash.round":15,"lodash.sample":16,"three":27,"three-window-resize":26}],34:[function(require,module,exports){
 var $ = require('jquery');
 var loop = require('raf-loop');
 var Environment = require('./environment');
@@ -56909,7 +56997,7 @@ class Engine {
 
 module.exports = Engine;
 
-},{"./audio-interface":31,"./environment":32,"./mountain-range":34,"./space":35,"./view":36,"jquery":12,"lodash.round":15,"raf-loop":21}],34:[function(require,module,exports){
+},{"./audio-interface":32,"./environment":33,"./mountain-range":35,"./space":36,"./view":37,"jquery":12,"lodash.round":15,"raf-loop":21}],35:[function(require,module,exports){
 var $ = require('jquery');
 var scale = require('scale-number-range');
 var convert = require('color-convert');
@@ -56980,7 +57068,7 @@ class MountainRange {
 
 module.exports = MountainRange;
 
-},{"color-convert":4,"jquery":12,"scale-number-range":24}],35:[function(require,module,exports){
+},{"color-convert":4,"jquery":12,"scale-number-range":25}],36:[function(require,module,exports){
 var $ = require('jquery');
 var min = require('lodash.min');
 
@@ -57029,7 +57117,7 @@ class Space {
 
 module.exports = Space;
 
-},{"jquery":12,"lodash.min":13}],36:[function(require,module,exports){
+},{"jquery":12,"lodash.min":13}],37:[function(require,module,exports){
 var $ = require('jquery');
 var convert = require('color-convert');
 
@@ -57105,17 +57193,18 @@ class View {
     $('body').css({ background: '#' + this.backgroundHex });
     $('#ground-overlay').css({ background: '#' + this.backgroundHex });
     $('.color-transition-copy').css({ background: '#' + this.textHex, color: '#' + this.backgroundHex });
+    $('.audio-control').css({ color: '#' + this.textHex });
   }
 
 }
 
 module.exports = View;
 
-},{"color-convert":4,"jquery":12}],37:[function(require,module,exports){
+},{"color-convert":4,"jquery":12}],38:[function(require,module,exports){
 var Engine = require('./engine');
 
 var engine = new Engine();
 engine.bindEventListeners();
 engine.start();
 
-},{"./engine":33}]},{},[37]);
+},{"./engine":34}]},{},[38]);
