@@ -57174,7 +57174,7 @@ class View {
 
   handleVideoLinkClick(e) {
     var embedUrl = $(e.target).attr('data-embedUrl');
-    var $iframe = $('<iframe width="560" height="315" src="' + embedUrl + '" frameborder="0" allowfullscreen modestbranding=1 showInfo=0 origin="http://localhost:9966"></iframe>');
+    var $iframe = $('<iframe width="560" height="315" src="' + embedUrl + '" frameborder="0" allowfullscreen modestbranding=1 showInfo=0 origin="http://fuckafucka.com"></iframe>');
     $iframe.css({ position: 'fixed' });
     $iframe.load(function () {
       console.log('meow');
