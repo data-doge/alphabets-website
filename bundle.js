@@ -57141,11 +57141,11 @@ class View {
   }
 
   populateVideoPanel() {
-    var html = [{ gifUrl: './media/0.gif', videoUrl: 'https://www.youtube.com/watch?v=AP8x8An1lL0' }, { gifUrl: './media/1.gif', videoUrl: 'https://www.youtube.com/watch?v=x2krBemxX_Y' }, { gifUrl: './media/2.gif', videoUrl: 'https://www.youtube.com/watch?v=qc38Qvsx8j8' }, { gifUrl: './media/3.gif', videoUrl: 'https://www.youtube.com/watch?v=AEgHP-3NxVc' }, { gifUrl: './media/4.gif', videoUrl: 'https://www.youtube.com/watch?v=KSQg9QKvstE' }].map(function (_ref2) {
+    var html = [{ gifUrl: './media/0.gif', embedUrl: 'https://www.youtube.com/embed/AP8x8An1lL0' }, { gifUrl: './media/1.gif', embedUrl: 'https://www.youtube.com/embed/x2krBemxX_Y' }, { gifUrl: './media/2.gif', embedUrl: 'https://www.youtube.com/embed/qc38Qvsx8j8' }, { gifUrl: './media/3.gif', embedUrl: 'https://www.youtube.com/embed/AEgHP-3NxVc' }, { gifUrl: './media/4.gif', embedUrl: 'https://www.youtube.com/embed/KSQg9QKvstE' }].map(function (_ref2) {
       var gifUrl = _ref2.gifUrl,
-          videoUrl = _ref2.videoUrl;
+          embedUrl = _ref2.embedUrl;
 
-      return '\n        <a href=' + videoUrl + ' class="album-link" target="_blank">\n          <img class="album-art" src=' + gifUrl + ' />\n        </a>\n      ';
+      return '\n        <img class="video-art" src=' + gifUrl + ' data-embedUrl=' + embedUrl + ' />\n      ';
     });
     $('#video-panel').html(html);
   }
@@ -57155,10 +57155,11 @@ class View {
   }
 
   bindEventListeners() {
-    $('a').on('click', this.handleLinkClick.bind(this));
+    $('.nav-link').on('click', this.handleNavLinkClick.bind(this));
+    $(document).on('click', '.video-art', this.handleVideoLinkClick.bind(this));
   }
 
-  handleLinkClick(e) {
+  handleNavLinkClick(e) {
     e.preventDefault();
     var id = e.target.id;
     if (id === 'audio') {
@@ -57169,6 +57170,29 @@ class View {
     }
     $('.panel').hide();
     $('#' + id + '-panel').show();
+  }
+
+  handleVideoLinkClick(e) {
+    var embedUrl = $(e.target).attr('data-embedUrl');
+    var $iframe = $('<iframe width="560" height="315" src="' + embedUrl + '" frameborder="0" allowfullscreen modestbranding=1 showInfo=0 origin="http://localhost:9966"></iframe>');
+    $iframe.css({ position: 'fixed' });
+    $iframe.load(function () {
+      console.log('meow');
+      setTimeout(function () {
+        $iframe = $('iframe');
+        var playBtn = $iframe.contents().find('.ytp-large-play-button.ytp-button');
+        console.log({ playBtn: playBtn });
+      }, 3000);
+    });
+    $('body').append($iframe);
+    // $iframe.hide()
+
+    //
+    // setTimeout(() => { $('').click() }, 5000)
+    // $(document).on('click', '.ytp-large-play-button.ytp-button', () => {
+    //   console.log('meow')
+    //   $('.ytp-fullscreen-button.ytp-button').click()
+    // })
   }
 
   makeDarker(currentCount, totalCount) {

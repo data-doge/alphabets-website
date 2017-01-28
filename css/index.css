@@ -79,6 +79,15 @@ body {
   margin-bottom: 5px;
 }
 
+.video-art {
+  width: 200px;
+  height: 200px;
+  margin-right: 5px;
+  margin-bottom: 5px;
+  display: block;
+  cursor: pointer;
+}
+
 @media (max-width: 480px) {
 
   #copy-container {
