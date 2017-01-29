@@ -117,10 +117,9 @@ p {
   margin-bottom: 10px;
 }
 
-ul {
+#nav-links {
   margin: 0;
   padding: 0;
-  margin-bottom: 10px;
 }
 
 li {
@@ -128,6 +127,7 @@ li {
   font-size: 14px;
   list-style: none;
   margin-right: 3px;
+  margin-bottom: 10px;
   padding: 2px 5px;
 }
 
@@ -139,6 +139,10 @@ a {
 
 a:hover {
   border-color: transparent;
+}
+
+#components-panel {
+  max-width: 400px;
 }
 
 /* loading screen */
