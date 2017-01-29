@@ -3,7 +3,8 @@ const convert = require('color-convert')
 
 class View {
 
-  constructor () {
+  constructor ({ audioInterface }) {
+    this.audioInterface = audioInterface
     this.textHex = 'FFFFFF'
     this.backgroundHex = '000000'
     this.bindEventListeners()
@@ -79,6 +80,7 @@ class View {
   }
 
   handleVideoLinkClick (e) {
+    this.audioInterface.pause()
     const src = $(e.target).attr('data-src')
     const $video = $(`
       <div id="video-container">

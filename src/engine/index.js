@@ -11,9 +11,9 @@ class Engine {
 
   constructor () {
     this.environment = new Environment()
-    this.view = new View()
     this.space = new Space()
     this.audioInterface = new AudioInterface()
+    this.view = new View({ audioInterface: this.audioInterface })
     this.mountainRange = new MountainRange()
   }
 
