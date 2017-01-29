@@ -56945,9 +56945,9 @@ class Engine {
 
   constructor() {
     this.environment = new Environment();
-    this.view = new View();
     this.space = new Space();
     this.audioInterface = new AudioInterface();
+    this.view = new View({ audioInterface: this.audioInterface });
     this.mountainRange = new MountainRange();
   }
 
@@ -57123,17 +57123,20 @@ var convert = require('color-convert');
 
 class View {
 
-  constructor() {
+  constructor(_ref) {
+    var audioInterface = _ref.audioInterface;
+
+    this.audioInterface = audioInterface;
     this.textHex = 'FFFFFF';
     this.backgroundHex = '000000';
     this.bindEventListeners();
   }
 
   populateAudioPanel() {
-    var html = [{ imgUrl: 'https://f4.bcbits.com/img/a3247042134_2.jpg', bcUrl: 'https://lotsoflettershere.bandcamp.com/album/dead-beat-til-i-die', title: 'dead//beat til i die' }, { imgUrl: 'https://f4.bcbits.com/img/a3287578958_2.jpg', bcUrl: 'https://lotsoflettershere.bandcamp.com/album/steeping', title: 'steeping' }, { imgUrl: 'https://f4.bcbits.com/img/a2557375228_2.jpg', bcUrl: 'https://lotsoflettershere.bandcamp.com/album/motionless', title: 'motionless' }, { imgUrl: 'https://f4.bcbits.com/img/a2361122322_2.jpg', bcUrl: 'https://lotsoflettershere.bandcamp.com/album/stress', title: 'stress' }, { imgUrl: 'https://f4.bcbits.com/img/a3136442865_2.jpg', bcUrl: 'https://lotsoflettershere.bandcamp.com/album/low-vibes', title: 'low vibes' }, { imgUrl: 'https://f4.bcbits.com/img/a0412213850_2.jpg', bcUrl: 'https://lotsoflettershere.bandcamp.com/album/untitled-ep-4', title: 'untitled ep4' }, { imgUrl: 'https://f4.bcbits.com/img/a1343068421_2.jpg', bcUrl: 'https://lotsoflettershere.bandcamp.com/album/untitled-ep-3', title: 'untitled ep3' }, { imgUrl: 'https://f4.bcbits.com/img/a1637662097_2.jpg', bcUrl: 'https://lotsoflettershere.bandcamp.com/album/takes-the-air', title: 'takes the air' }, { imgUrl: 'https://f4.bcbits.com/img/a3163431488_2.jpg', bcUrl: 'https://lotsoflettershere.bandcamp.com/album/untitled-ep-2', title: 'untitled ep 2' }, { imgUrl: 'https://f4.bcbits.com/img/a2362660752_2.jpg', bcUrl: 'https://lotsoflettershere.bandcamp.com/album/untitled-ep', title: 'untitled ep' }, { imgUrl: 'https://f4.bcbits.com/img/a0499335438_2.jpg', bcUrl: 'https://lotsoflettershere.bandcamp.com/album/thought-loop', title: 'thought loop' }, { imgUrl: 'https://f4.bcbits.com/img/a0500555093_2.jpg', bcUrl: 'https://lotsoflettershere.bandcamp.com/album/hfpn011-a-long-interval-marked-by-nothing-of-distinguished-note', title: '(HFPN011) a long interval, marked by nothing of distinguished note' }, { imgUrl: 'https://f4.bcbits.com/img/a2317249876_2.jpg', bcUrl: 'https://lotsoflettershere.bandcamp.com/album/cold-heart-warm', title: 'cold/heart\\warm' }, { imgUrl: 'https://f4.bcbits.com/img/a3290534802_2.jpg', bcUrl: 'https://lotsoflettershere.bandcamp.com/album/music-to-watch-clouds-with', title: 'music to watch clouds with' }, { imgUrl: 'https://f4.bcbits.com/img/a3201699299_2.jpg', bcUrl: 'https://lotsoflettershere.bandcamp.com/album/so-long-blue-skies', title: '(so long) blue skies' }, { imgUrl: 'https://f4.bcbits.com/img/a4109433261_2.jpg', bcUrl: 'https://lotsoflettershere.bandcamp.com/album/view', title: 'view' }, { imgUrl: 'https://f4.bcbits.com/img/a4085011476_2.jpg', bcUrl: 'https://lotsoflettershere.bandcamp.com/album/ilo', title: 'ilo' }, { imgUrl: 'https://f4.bcbits.com/img/a2870091575_2.jpg', bcUrl: 'https://lotsoflettershere.bandcamp.com/album/well', title: 'well' }, { imgUrl: 'https://f4.bcbits.com/img/a0329685018_2.jpg', bcUrl: 'https://lotsoflettershere.bandcamp.com/album/-', title: '...' }, { imgUrl: 'https://f4.bcbits.com/img/a2153041237_2.jpg', bcUrl: 'https://lotsoflettershere.bandcamp.com/album/styrofoam-sleep', title: 'Styrofoam Sleep' }, { imgUrl: 'https://f4.bcbits.com/img/a1789288278_2.jpg', bcUrl: 'https://lotsoflettershere.bandcamp.com/album/red-oak-intermodulation', title: 'Red Oak Intermodulation' }, { imgUrl: 'https://f4.bcbits.com/img/a4058127069_2.jpg', bcUrl: 'https://lotsoflettershere.bandcamp.com/album/um-ah', title: 'Um / Ah' }, { imgUrl: 'https://f4.bcbits.com/img/a1942401491_2.jpg', bcUrl: 'https://lotsoflettershere.bandcamp.com/album/oh-people', title: 'Oh [people]' }].map(function (_ref) {
-      var imgUrl = _ref.imgUrl,
-          bcUrl = _ref.bcUrl,
-          title = _ref.title;
+    var html = [{ imgUrl: 'https://f4.bcbits.com/img/a3247042134_2.jpg', bcUrl: 'https://lotsoflettershere.bandcamp.com/album/dead-beat-til-i-die', title: 'dead//beat til i die' }, { imgUrl: 'https://f4.bcbits.com/img/a3287578958_2.jpg', bcUrl: 'https://lotsoflettershere.bandcamp.com/album/steeping', title: 'steeping' }, { imgUrl: 'https://f4.bcbits.com/img/a2557375228_2.jpg', bcUrl: 'https://lotsoflettershere.bandcamp.com/album/motionless', title: 'motionless' }, { imgUrl: 'https://f4.bcbits.com/img/a2361122322_2.jpg', bcUrl: 'https://lotsoflettershere.bandcamp.com/album/stress', title: 'stress' }, { imgUrl: 'https://f4.bcbits.com/img/a3136442865_2.jpg', bcUrl: 'https://lotsoflettershere.bandcamp.com/album/low-vibes', title: 'low vibes' }, { imgUrl: 'https://f4.bcbits.com/img/a0412213850_2.jpg', bcUrl: 'https://lotsoflettershere.bandcamp.com/album/untitled-ep-4', title: 'untitled ep4' }, { imgUrl: 'https://f4.bcbits.com/img/a1343068421_2.jpg', bcUrl: 'https://lotsoflettershere.bandcamp.com/album/untitled-ep-3', title: 'untitled ep3' }, { imgUrl: 'https://f4.bcbits.com/img/a1637662097_2.jpg', bcUrl: 'https://lotsoflettershere.bandcamp.com/album/takes-the-air', title: 'takes the air' }, { imgUrl: 'https://f4.bcbits.com/img/a3163431488_2.jpg', bcUrl: 'https://lotsoflettershere.bandcamp.com/album/untitled-ep-2', title: 'untitled ep 2' }, { imgUrl: 'https://f4.bcbits.com/img/a2362660752_2.jpg', bcUrl: 'https://lotsoflettershere.bandcamp.com/album/untitled-ep', title: 'untitled ep' }, { imgUrl: 'https://f4.bcbits.com/img/a0499335438_2.jpg', bcUrl: 'https://lotsoflettershere.bandcamp.com/album/thought-loop', title: 'thought loop' }, { imgUrl: 'https://f4.bcbits.com/img/a0500555093_2.jpg', bcUrl: 'https://lotsoflettershere.bandcamp.com/album/hfpn011-a-long-interval-marked-by-nothing-of-distinguished-note', title: '(HFPN011) a long interval, marked by nothing of distinguished note' }, { imgUrl: 'https://f4.bcbits.com/img/a2317249876_2.jpg', bcUrl: 'https://lotsoflettershere.bandcamp.com/album/cold-heart-warm', title: 'cold/heart\\warm' }, { imgUrl: 'https://f4.bcbits.com/img/a3290534802_2.jpg', bcUrl: 'https://lotsoflettershere.bandcamp.com/album/music-to-watch-clouds-with', title: 'music to watch clouds with' }, { imgUrl: 'https://f4.bcbits.com/img/a3201699299_2.jpg', bcUrl: 'https://lotsoflettershere.bandcamp.com/album/so-long-blue-skies', title: '(so long) blue skies' }, { imgUrl: 'https://f4.bcbits.com/img/a4109433261_2.jpg', bcUrl: 'https://lotsoflettershere.bandcamp.com/album/view', title: 'view' }, { imgUrl: 'https://f4.bcbits.com/img/a4085011476_2.jpg', bcUrl: 'https://lotsoflettershere.bandcamp.com/album/ilo', title: 'ilo' }, { imgUrl: 'https://f4.bcbits.com/img/a2870091575_2.jpg', bcUrl: 'https://lotsoflettershere.bandcamp.com/album/well', title: 'well' }, { imgUrl: 'https://f4.bcbits.com/img/a0329685018_2.jpg', bcUrl: 'https://lotsoflettershere.bandcamp.com/album/-', title: '...' }, { imgUrl: 'https://f4.bcbits.com/img/a2153041237_2.jpg', bcUrl: 'https://lotsoflettershere.bandcamp.com/album/styrofoam-sleep', title: 'Styrofoam Sleep' }, { imgUrl: 'https://f4.bcbits.com/img/a1789288278_2.jpg', bcUrl: 'https://lotsoflettershere.bandcamp.com/album/red-oak-intermodulation', title: 'Red Oak Intermodulation' }, { imgUrl: 'https://f4.bcbits.com/img/a4058127069_2.jpg', bcUrl: 'https://lotsoflettershere.bandcamp.com/album/um-ah', title: 'Um / Ah' }, { imgUrl: 'https://f4.bcbits.com/img/a1942401491_2.jpg', bcUrl: 'https://lotsoflettershere.bandcamp.com/album/oh-people', title: 'Oh [people]' }].map(function (_ref2) {
+      var imgUrl = _ref2.imgUrl,
+          bcUrl = _ref2.bcUrl,
+          title = _ref2.title;
 
       return '\n        <a href=' + bcUrl + ' class="album-link" target="_blank">\n          <img class="album-art" src=' + imgUrl + ' />\n        </a>\n      ';
     });
@@ -57141,11 +57144,11 @@ class View {
   }
 
   populateVideoPanel() {
-    var html = [{ gifUrl: './media/0.gif', embedUrl: 'https://www.youtube.com/embed/AP8x8An1lL0' }, { gifUrl: './media/1.gif', embedUrl: 'https://www.youtube.com/embed/x2krBemxX_Y' }, { gifUrl: './media/2.gif', embedUrl: 'https://www.youtube.com/embed/qc38Qvsx8j8' }, { gifUrl: './media/3.gif', embedUrl: 'https://www.youtube.com/embed/AEgHP-3NxVc' }, { gifUrl: './media/4.gif', embedUrl: 'https://www.youtube.com/embed/KSQg9QKvstE' }].map(function (_ref2) {
-      var gifUrl = _ref2.gifUrl,
-          embedUrl = _ref2.embedUrl;
+    var html = [{ gifUrl: './media/0.gif', src: 'https://github.com/data-doge/hosted-videos/blob/master/0.mp4?raw=true' }, { gifUrl: './media/1.gif', src: 'https://github.com/data-doge/hosted-videos/blob/master/1.mp4?raw=true' }, { gifUrl: './media/2.gif', src: 'https://github.com/data-doge/hosted-videos/blob/master/2.mp4?raw=true' }, { gifUrl: './media/3.gif', src: 'https://github.com/data-doge/hosted-videos/blob/master/3.mp4?raw=true' }, { gifUrl: './media/4.gif', src: 'https://github.com/data-doge/hosted-videos/blob/master/4.mp4?raw=true' }].map(function (_ref3) {
+      var gifUrl = _ref3.gifUrl,
+          src = _ref3.src;
 
-      return '\n        <img class="video-art" src=' + gifUrl + ' data-embedUrl=' + embedUrl + ' />\n      ';
+      return '\n        <img class="video-art" src=' + gifUrl + ' data-src=' + src + ' />\n      ';
     });
     $('#video-panel').html(html);
   }
@@ -57157,6 +57160,7 @@ class View {
   bindEventListeners() {
     $('.nav-link').on('click', this.handleNavLinkClick.bind(this));
     $(document).on('click', '.video-art', this.handleVideoLinkClick.bind(this));
+    $(document).on('click', '#close-video', this.handleCloseVideoClick.bind(this));
   }
 
   handleNavLinkClick(e) {
@@ -57173,26 +57177,14 @@ class View {
   }
 
   handleVideoLinkClick(e) {
-    var embedUrl = $(e.target).attr('data-embedUrl');
-    var $iframe = $('<iframe width="560" height="315" src="' + embedUrl + '" frameborder="0" allowfullscreen modestbranding=1 showInfo=0 origin="http://fuckafucka.com"></iframe>');
-    $iframe.css({ position: 'fixed' });
-    $iframe.load(function () {
-      console.log('meow');
-      setTimeout(function () {
-        $iframe = $('iframe');
-        var playBtn = $iframe.contents().find('.ytp-large-play-button.ytp-button');
-        console.log({ playBtn: playBtn });
-      }, 3000);
-    });
-    $('body').append($iframe);
-    // $iframe.hide()
+    this.audioInterface.pause();
+    var src = $(e.target).attr('data-src');
+    var $video = $('\n      <div id="video-container">\n        <div id="close-video">&times;</div>\n        <video autoplay>\n          <source src="' + src + '"></source>\n        </video>\n      </div>\n    ');
+    $('body').append($video);
+  }
 
-    //
-    // setTimeout(() => { $('').click() }, 5000)
-    // $(document).on('click', '.ytp-large-play-button.ytp-button', () => {
-    //   console.log('meow')
-    //   $('.ytp-fullscreen-button.ytp-button').click()
-    // })
+  handleCloseVideoClick(e) {
+    $('#video-container').remove();
   }
 
   makeDarker(currentCount, totalCount) {

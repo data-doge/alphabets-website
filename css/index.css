@@ -117,10 +117,9 @@ p {
   margin-bottom: 10px;
 }
 
-ul {
+#nav-links {
   margin: 0;
   padding: 0;
-  margin-bottom: 10px;
 }
 
 li {
@@ -128,6 +127,7 @@ li {
   font-size: 14px;
   list-style: none;
   margin-right: 3px;
+  margin-bottom: 10px;
   padding: 2px 5px;
 }
 
@@ -139,6 +139,10 @@ a {
 
 a:hover {
   border-color: transparent;
+}
+
+#components-panel {
+  max-width: 400px;
 }
 
 /* loading screen */
@@ -159,6 +163,8 @@ a:hover {
   font-size: 18px;
   font-weight: 300;
 }
+
+/* space */
 
 #space-container {
   position: fixed;
@@ -203,4 +209,30 @@ a:hover {
   right: 0;
   position: fixed;
   z-index: -10;
+}
+
+/* video */
+
+video {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  z-index: 1000;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  left: 0;
+  background: black;
+}
+
+#close-video {
+  position: fixed;
+  top: 10px;
+  left: 10px;
+  color: white;
+  z-index: 1001;
+  font-size: 40px;
+  line-height: 0.5;
+  font-weight: 100;
+  cursor: pointer;
 }
