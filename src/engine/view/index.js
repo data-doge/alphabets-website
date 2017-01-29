@@ -46,16 +46,14 @@ class View {
 
   populateVideoPanel () {
     const html = [
-      { gifUrl: './media/0.gif', videoUrl: 'https://www.youtube.com/watch?v=AP8x8An1lL0' },
-      { gifUrl: './media/1.gif', videoUrl: 'https://www.youtube.com/watch?v=x2krBemxX_Y' },
-      { gifUrl: './media/2.gif', videoUrl: 'https://www.youtube.com/watch?v=qc38Qvsx8j8' },
-      { gifUrl: './media/3.gif', videoUrl: 'https://www.youtube.com/watch?v=AEgHP-3NxVc' },
-      { gifUrl: './media/4.gif', videoUrl: 'https://www.youtube.com/watch?v=KSQg9QKvstE' }
-    ].map(({ gifUrl, videoUrl }) => {
+      { gifUrl: './media/0.gif', src: 'https://github.com/data-doge/hosted-videos/blob/master/0.mp4?raw=true' },
+      { gifUrl: './media/1.gif', src: 'https://github.com/data-doge/hosted-videos/blob/master/1.mp4?raw=true' },
+      { gifUrl: './media/2.gif', src: 'https://github.com/data-doge/hosted-videos/blob/master/2.mp4?raw=true' },
+      { gifUrl: './media/3.gif', src: 'https://github.com/data-doge/hosted-videos/blob/master/3.mp4?raw=true' },
+      { gifUrl: './media/4.gif', src: 'https://github.com/data-doge/hosted-videos/blob/master/4.mp4?raw=true' }
+    ].map(({ gifUrl, src }) => {
       return `
-        <a href=${videoUrl} class="album-link" target="_blank">
-          <img class="album-art" src=${gifUrl} />
-        </a>
+        <img class="video-art" src=${gifUrl} data-src=${src} />
       `
     })
     $('#video-panel').html(html)
@@ -66,16 +64,35 @@ class View {
   }
 
   bindEventListeners () {
-    $('a').on('click', this.handleLinkClick.bind(this))
+    $('.nav-link').on('click', this.handleNavLinkClick.bind(this))
+    $(document).on('click', '.video-art', this.handleVideoLinkClick.bind(this))
+    $(document).on('click', '#close-video', this.handleCloseVideoClick.bind(this))
   }
 
-  handleLinkClick (e) {
+  handleNavLinkClick (e) {
     e.preventDefault()
     const id = e.target.id
     if (id === 'audio') { this.populateAudioPanel() }
     if (id === 'video') { this.populateVideoPanel() }
     $('.panel').hide()
     $(`#${id}-panel`).show()
+  }
+
+  handleVideoLinkClick (e) {
+    const src = $(e.target).attr('data-src')
+    const $video = $(`
+      <div id="video-container">
+        <div id="close-video">&times;</div>
+        <video autoplay>
+          <source src="${src}"></source>
+        </video>
+      </div>
+    `)
+    $('body').append($video)
+  }
+
+  handleCloseVideoClick (e) {
+    $('#video-container').remove()
   }
 
   makeDarker (currentCount, totalCount) {
