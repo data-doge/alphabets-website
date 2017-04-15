@@ -41,10 +41,8 @@ body {
 }
 
 #copy-container {
-  position: relative;
   padding: 40px;
   color: black;
-  z-index: 0;
 }
 
 .panel {
