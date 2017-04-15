@@ -8,8 +8,12 @@ class AudioInterface {
 
   constructor () {
     this.currentAudioIdIndex = 0
-    this.ctx = new (window.AudioContext || window.webkitAudioContext)()
-    this.sources = audioIds.map(id => this.ctx.createMediaElementSource($(id)[0]))
+    this.ctx = new (window.webkitAudioContext || window.AudioContext)()
+    this.sources = audioIds.map(id => {
+      let source = this.ctx.createMediaElementSource($(id)[0])
+      if (!source.mediaElement) { source.mediaElement || $(id)[0] } // patch for AudioContext/firefox
+      return source
+    })
     this.analyser = webAudioAnalyser2({
       context: this.ctx,
       fftSize: 2048,
