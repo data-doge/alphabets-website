@@ -28,8 +28,7 @@ class Environment {
     this.renderer.setSize(window.innerWidth, window.innerHeight)
     this.renderer.setClearColor(0x000000, 0)
 
-    const windowResize = new WindowResize(this.renderer, this.camera)
-    console.log({ windowResize })
+    this.windowResize = new WindowResize(this.renderer, this.camera)
 
     this.addRailSegmentsToScene(numRails)
     this.addPowerLinesToScene()
@@ -42,19 +41,8 @@ class Environment {
     this.renderer.render(this.scene, this.camera)
   }
 
-  makeLighter (currentCount, totalCount) {
-    const opacity = 100 - Math.round(currentCount / totalCount * 100)
-    this.materialColor = new Color(`hsl(0, 0%, ${opacity}%)`)
-    this.scene.traverse(node => {
-      if (node instanceof Mesh) {
-        node.material = new MeshBasicMaterial({ color: this.materialColor })
-      }
-    })
-  }
-
-  makeDarker (currentCount, totalCount) {
-    const opacity = Math.round(currentCount / totalCount * 100)
-    this.materialColor = new Color(`hsl(0, 0%, ${opacity}%)`)
+  renderColors (primary) {
+    this.materialColor = new Color(`#${primary}`)
     this.scene.traverse(node => {
       if (node instanceof Mesh) {
         node.material = new MeshBasicMaterial({ color: this.materialColor })

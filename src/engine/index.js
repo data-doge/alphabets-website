@@ -6,6 +6,7 @@ const Space = require('./space')
 const AudioInterface = require('./audio-interface')
 const round = require('lodash.round')
 const MountainRange = require('./mountain-range')
+const convert = require('color-convert')
 
 class Engine {
 
@@ -37,16 +38,17 @@ class Engine {
       const ticker = 1 * round(deg, 1) % 180
       if (ticker % 180 === 0) { isDay = !isDay }
       if (ticker > 180 - lightChangeCountdown) {
-        let currentCount = 180 - ticker
-        if (isDay) {
-          this.view.makeDarker(currentCount, lightChangeCountdown)
-          this.environment.makeLighter(currentCount, lightChangeCountdown)
-          this.mountainRange.makeLighter(currentCount, lightChangeCountdown)
-        } else {
-          this.view.makeLighter(currentCount, lightChangeCountdown)
-          this.environment.makeDarker(currentCount, lightChangeCountdown)
-          this.mountainRange.makeDarker(currentCount, lightChangeCountdown)
+        const lightness = (180 - ticker) / lightChangeCountdown
+        const colors = isDay ? {
+          primary: convert.hsl.hex(0, 0, (1 - lightness) * 100),
+          secondary: convert.hsl.hex(0, 0, lightness * 100)
+        } : {
+          primary: convert.hsl.hex(0, 0, lightness * 100),
+          secondary: convert.hsl.hex(0, 0, (1 - lightness) * 100)
         }
+        this.view.renderColors(colors.primary, colors.secondary)
+        this.mountainRange.renderColors(colors.primary, colors.secondary)
+        this.environment.renderColors(colors.primary)
       }
     }).start()
   }
