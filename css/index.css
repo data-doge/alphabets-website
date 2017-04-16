@@ -24,6 +24,10 @@ body {
   cursor: pointer;
 }
 
+#pause, #play {
+  width: 14px;
+}
+
 #pause {
   display: none;
 }
@@ -45,10 +49,16 @@ body {
   color: black;
 }
 
+@media (max-width: 480px) {
+  #copy-container {
+    padding: 30px;
+  }
+}
+
 .panel {
   position: relative;
   display: none;
-  font-size: 14px;
+  font-size: 13px;
 }
 
 #audio-panel {
@@ -86,14 +96,6 @@ body {
   cursor: pointer;
 }
 
-@media (max-width: 480px) {
-
-  #copy-container {
-    padding: 30px;
-  }
-
-}
-
 .color-transition-copy {
   background: black;
   color: white;
@@ -107,12 +109,20 @@ h1 {
   margin-bottom: 10px;
 }
 
+.paragraph-panel {
+  max-width: 375px;
+  font-size: 13px;
+  padding: 10px;
+  margin: 0;
+}
+
 p {
-  max-width: 400px;
-  font-size: 14px;
-  padding: 3px 5px;
   margin: 0;
   margin-bottom: 10px;
+}
+
+p:last-child {
+  margin-bottom: 0;
 }
 
 #nav-links {
@@ -122,9 +132,9 @@ p {
 
 li {
   display: inline-block;
-  font-size: 14px;
+  font-size: 13px;
   list-style: none;
-  margin-right: 3px;
+  margin-right: 5px;
   margin-bottom: 10px;
   padding: 2px 5px;
 }
@@ -137,10 +147,6 @@ a {
 
 a:hover {
   border-color: transparent;
-}
-
-#components-panel {
-  max-width: 400px;
 }
 
 /* loading screen */
