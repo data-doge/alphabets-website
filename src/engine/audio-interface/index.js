@@ -26,10 +26,25 @@ class AudioInterface {
   }
 
   bindEventListeners () {
-    $('#step-backward').click(this.stepBackward.bind(this))
-    $('#pause').click(this.pause.bind(this))
-    $('#play').click(this.play.bind(this))
-    $('#step-forward').click(this.stepForward.bind(this))
+    $('#play').click(e => {
+      this.play()
+      $('#play-sound')[0].play()
+    })
+    $('#pause').click(e => {
+      this.pause()
+      $('#pause-sound')[0].play()
+    })
+    $('#step-forward').click(e => {
+      this.stepForward()
+      $('#step-sound')[0].play()
+    })
+    $('#step-backward').click(e => {
+      this.stepBackward()
+      $('#step-sound')[0].play()
+    })
+    this.sources.forEach(source => {
+      source.mediaElement.onended = this.stepForward.bind(this)
+    })
   }
 
   measure () {
@@ -43,6 +58,14 @@ class AudioInterface {
 
   currentAudio () {
     return this.currentSource().mediaElement
+  }
+
+  stepForward () {
+    this.pause()
+    this.currentAudio().currentTime = 0
+    this.sources = rotate(this.sources, 1)
+    this.currentSource().connect(this.analyser)
+    this.play()
   }
 
   stepBackward () {
@@ -64,15 +87,7 @@ class AudioInterface {
   play () {
     $('#play').hide()
     $('#pause').show()
-    this.currentAudio().play()
-  }
-
-  stepForward () {
-    this.pause()
-    this.currentAudio().currentTime = 0
-    this.sources = rotate(this.sources, 1)
-    this.currentSource().connect(this.analyser)
-    this.play()
+    setTimeout(() => { this.currentAudio().play() }, 1000)
   }
 
 }
