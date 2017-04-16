@@ -18,8 +18,8 @@ class View {
   }
 
   populateVideoPanel () {
-    $('#video-panel').html(videoList.map(({ gif, audio }) => `
-      <img class="video-art" src=${gif} data-src="https://github.com/data-doge/hosted-videos/blob/master/${audio}?raw=true" />
+    $('#video-panel').html(videoList.map(({ gif, video }) => `
+      <img class="video-art" src=${gif} data-src="https://github.com/data-doge/hosted-videos/blob/master/${video}?raw=true" />
     `))
   }
 
