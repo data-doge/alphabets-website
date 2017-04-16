@@ -9,7 +9,6 @@ const MountainRange = require('./mountain-range')
 const convert = require('color-convert')
 
 class Engine {
-
   constructor () {
     this.environment = new Environment()
     this.space = new Space()
@@ -52,7 +51,6 @@ class Engine {
       }
     }).start()
   }
-
 }
 
 module.exports = Engine

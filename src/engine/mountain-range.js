@@ -2,7 +2,6 @@ const $ = require('jquery')
 const scale = require('scale-number-range')
 
 class MountainRange {
-
   constructor () {
     this.canvas = $('#mountain-range')[0]
     this.ctx = this.canvas.getContext('2d')
@@ -55,7 +54,6 @@ class MountainRange {
     this.strokeStyle = `#${primary}`
     this.fillStyle = `#${secondary}`
   }
-
 }
 
 module.exports = MountainRange

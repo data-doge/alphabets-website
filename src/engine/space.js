@@ -2,7 +2,6 @@ const $ = require('jquery')
 const min = require('lodash.min')
 
 class Space {
-
   constructor () {
     this.$space = $('#space')
     this.setSpaceContainerSize()
@@ -41,7 +40,6 @@ class Space {
       left: centerX + this.spaceSize / 2 * Math.cos(theta + Math.PI)
     })
   }
-
 }
 
 module.exports = Space

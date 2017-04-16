@@ -5,13 +5,12 @@ const audioIds = range(10).map(i => `#track-${i}`)
 const rotate = require('rotate-array')
 
 class AudioInterface {
-
   constructor () {
     this.currentAudioIdIndex = 0
     this.ctx = new (window.webkitAudioContext || window.AudioContext)()
     this.sources = audioIds.map(id => {
       let source = this.ctx.createMediaElementSource($(id)[0])
-      if (!source.mediaElement) { source.mediaElement || $(id)[0] } // patch for AudioContext/firefox
+      if (!source.mediaElement) { source.mediaElement = $(id)[0] } // patch for AudioContext/firefox
       return source
     })
     this.analyser = webAudioAnalyser2({
@@ -89,7 +88,6 @@ class AudioInterface {
     $('#pause').show()
     setTimeout(() => { this.currentAudio().play() }, 1000)
   }
-
 }
 
 module.exports = AudioInterface

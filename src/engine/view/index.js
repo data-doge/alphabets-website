@@ -3,7 +3,6 @@ const audioList = require('./audio-list')
 const videoList = require('./video-list')
 
 class View {
-
   constructor ({ audioInterface }) {
     this.audioInterface = audioInterface
     this.bindEventListeners()
@@ -74,7 +73,6 @@ class View {
     $('.color-transition-copy').css({ background: `#${primary}`, color: `#${secondary}` })
     $('.audio-control').css({ color: `#${primary}` })
   }
-
 }
 
 module.exports = View
