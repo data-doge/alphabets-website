@@ -63,6 +63,7 @@ class View {
 
   bindEventListeners () {
     $('.nav-link').on('click', this.handleNavLinkClick.bind(this))
+    $('#home').on('click', this.hideAllPanels.bind(this))
     $(document).on('click', '.video-art', this.handleVideoLinkClick.bind(this))
     $(document).on('click', '#close-video', this.handleCloseVideoClick.bind(this))
   }
@@ -70,10 +71,19 @@ class View {
   handleNavLinkClick (e) {
     e.preventDefault()
     const id = e.target.id
-    if (id === 'audio') { this.populateAudioPanel() }
-    if (id === 'video') { this.populateVideoPanel() }
-    $('.panel').hide()
-    $(`#${id}-panel`).show()
+    const $panel = $(`#${id}-panel`)
+    if ($panel.attr('data-selected') === 'true') {
+      $panel.hide().attr('data-selected', false)
+    } else {
+      if (id === 'audio') { this.populateAudioPanel() }
+      if (id === 'video') { this.populateVideoPanel() }
+      this.hideAllPanels()
+      $panel.show().attr('data-selected', true)
+    }
+  }
+
+  hideAllPanels () {
+    $('.panel').hide().attr('data-selected', false)
   }
 
   handleVideoLinkClick (e) {
