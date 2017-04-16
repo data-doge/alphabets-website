@@ -56683,9 +56683,13 @@ class AudioInterface {
     var _this = this;
 
     this.currentAudioIdIndex = 0;
-    this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+    this.ctx = new (window.webkitAudioContext || window.AudioContext)();
     this.sources = audioIds.map(function (id) {
-      return _this.ctx.createMediaElementSource($(id)[0]);
+      var source = _this.ctx.createMediaElementSource($(id)[0]);
+      if (!source.mediaElement) {
+        source.mediaElement || $(id)[0];
+      } // patch for AudioContext/firefox
+      return source;
     });
     this.analyser = webAudioAnalyser2({
       context: this.ctx,
@@ -56699,10 +56703,27 @@ class AudioInterface {
   }
 
   bindEventListeners() {
-    $('#step-backward').click(this.stepBackward.bind(this));
-    $('#pause').click(this.pause.bind(this));
-    $('#play').click(this.play.bind(this));
-    $('#step-forward').click(this.stepForward.bind(this));
+    var _this2 = this;
+
+    $('#play').click(function (e) {
+      _this2.play();
+      $('#play-sound')[0].play();
+    });
+    $('#pause').click(function (e) {
+      _this2.pause();
+      $('#pause-sound')[0].play();
+    });
+    $('#step-forward').click(function (e) {
+      _this2.stepForward();
+      $('#step-sound')[0].play();
+    });
+    $('#step-backward').click(function (e) {
+      _this2.stepBackward();
+      $('#step-sound')[0].play();
+    });
+    this.sources.forEach(function (source) {
+      source.mediaElement.onended = _this2.stepForward.bind(_this2);
+    });
   }
 
   measure() {
@@ -56719,6 +56740,14 @@ class AudioInterface {
 
   currentAudio() {
     return this.currentSource().mediaElement;
+  }
+
+  stepForward() {
+    this.pause();
+    this.currentAudio().currentTime = 0;
+    this.sources = rotate(this.sources, 1);
+    this.currentSource().connect(this.analyser);
+    this.play();
   }
 
   stepBackward() {
@@ -56738,17 +56767,13 @@ class AudioInterface {
   }
 
   play() {
+    var _this3 = this;
+
     $('#play').hide();
     $('#pause').show();
-    this.currentAudio().play();
-  }
-
-  stepForward() {
-    this.pause();
-    this.currentAudio().currentTime = 0;
-    this.sources = rotate(this.sources, 1);
-    this.currentSource().connect(this.analyser);
-    this.play();
+    setTimeout(function () {
+      _this3.currentAudio().play();
+    }, 1000);
   }
 
 }
@@ -56756,32 +56781,76 @@ class AudioInterface {
 module.exports = AudioInterface;
 
 },{"jquery":12,"lodash.range":14,"rotate-array":24,"web-audio-analyser-2":31}],33:[function(require,module,exports){
+var groundLevel = -1;
+var railSpacing = 4;
+var powerLineSpacing = 100;
+var numRails = 20;
+var numberOfPowerLines = numRails * railSpacing / powerLineSpacing;
+
+var constants = { groundLevel: groundLevel, railSpacing: railSpacing, numRails: numRails, powerLineSpacing: powerLineSpacing, numberOfPowerLines: numberOfPowerLines };
+
+module.exports = constants;
+
+},{}],34:[function(require,module,exports){
+var range = require('lodash.range');
+var round = require('lodash.round');
+
+var Collection = function (_ref) {
+  var Entity = _ref.Entity,
+      spacing = _ref.spacing,
+      scene = _ref.scene,
+      color = _ref.color,
+      count = _ref.count,
+      camera = _ref.camera;
+
+  var items = range(count).map(function () {
+    return new Entity({ color: color, scene: scene });
+  });
+
+  var addToEnd = function (scene, color) {
+    items.shift().remove();
+    items.push(new Entity({ color: color, scene: scene }));
+  };
+
+  var isReady = function (camera) {
+    return round(-camera.position.z, 1) % spacing === 0;
+  };
+
+  return {
+    render: function (scene, camera, color) {
+      if (isReady(camera)) {
+        addToEnd(scene, color);
+      }
+    }
+  };
+};
+
+module.exports = Collection;
+
+},{"lodash.range":14,"lodash.round":15}],35:[function(require,module,exports){
 var THREE = require('three');
 var Scene = THREE.Scene,
     PerspectiveCamera = THREE.PerspectiveCamera,
     WebGLRenderer = THREE.WebGLRenderer,
     MeshBasicMaterial = THREE.MeshBasicMaterial,
     Mesh = THREE.Mesh,
-    BoxGeometry = THREE.BoxGeometry,
     Vector3 = THREE.Vector3,
-    CylinderGeometry = THREE.CylinderGeometry,
     Color = THREE.Color;
 
 var $ = require('jquery');
 var WindowResize = require('three-window-resize');
-var range = require('lodash.range');
-var sample = require('lodash.sample');
-var round = require('lodash.round');
 
-var numRails = 20;
-var groundLevel = -1;
-var railSpacing = 4;
-var railTicker = 0;
-var powerLineSpacing = 100;
-var powerLineTicker = 0;
+var _require = require('../constants'),
+    railSpacing = _require.railSpacing,
+    powerLineSpacing = _require.powerLineSpacing,
+    numRails = _require.numRails,
+    numberOfPowerLines = _require.numberOfPowerLines;
+
+var Collection = require('./collection');
+var RailSegment = require('./rail-segment');
+var PowerLine = require('./power-line');
 
 class Environment {
-
   constructor() {
     this.materialColor = 0x000000;
     this.scene = new Scene();
@@ -56793,145 +56862,136 @@ class Environment {
 
     this.renderer = new WebGLRenderer({ alpha: true, canvas: $('#three-canvas')[0] });
     this.renderer.setSize(window.innerWidth, window.innerHeight);
-    this.renderer.setClearColor(0x000000, 0);
+    this.renderer.setClearColor(this.materialColor, 0);
+    this.renderer.context.getShaderInfoLog = function () {
+      return '';
+    };
 
-    var windowResize = new WindowResize(this.renderer, this.camera);
-    console.log({ windowResize: windowResize });
+    this.windowResize = new WindowResize(this.renderer, this.camera);
 
-    this.addRailSegmentsToScene(numRails);
-    this.addPowerLinesToScene();
+    this.railSegments = Collection({
+      Entity: RailSegment,
+      spacing: railSpacing,
+      scene: this.scene,
+      color: this.materialColor,
+      count: numRails,
+      camera: this.camera
+    });
+    this.powerLines = Collection({
+      Entity: PowerLine,
+      spacing: powerLineSpacing,
+      scene: this.scene,
+      color: this.materialColor,
+      count: numberOfPowerLines,
+      camera: this.camera
+    });
   }
 
   render() {
     this.camera.position.z -= 0.1; // reciprocal of incrementor must be a whole number or everything is fucked
-    if (this.isReadyToAddRailSegment()) {
-      this.addRailSegmentToEnd();
-    }
-    if (this.isReadyToAddPowerLine()) {
-      this.addPowerLineToEnd();
-    }
+    this.railSegments.render(this.scene, this.camera, this.materialColor);
+    this.powerLines.render(this.scene, this.camera, this.materialColor);
     this.renderer.render(this.scene, this.camera);
   }
 
-  makeLighter(currentCount, totalCount) {
+  renderColors(primary) {
     var _this = this;
 
-    var opacity = 100 - Math.round(currentCount / totalCount * 100);
-    this.materialColor = new Color('hsl(0, 0%, ' + opacity + '%)');
+    this.materialColor = new Color('#' + primary);
     this.scene.traverse(function (node) {
       if (node instanceof Mesh) {
         node.material = new MeshBasicMaterial({ color: _this.materialColor });
       }
     });
   }
-
-  makeDarker(currentCount, totalCount) {
-    var _this2 = this;
-
-    var opacity = Math.round(currentCount / totalCount * 100);
-    this.materialColor = new Color('hsl(0, 0%, ' + opacity + '%)');
-    this.scene.traverse(function (node) {
-      if (node instanceof Mesh) {
-        node.material = new MeshBasicMaterial({ color: _this2.materialColor });
-      }
-    });
-  }
-
-  // 'private'
-
-  isReadyToAddRailSegment() {
-    return round(-this.camera.position.z, 1) % railSpacing === 0;
-  }
-
-  isReadyToAddPowerLine() {
-    return round(-this.camera.position.z, 1) % powerLineSpacing === 0;
-  }
-
-  addPowerLineToEnd() {
-    var powerLineToRemove = this.powerLines.shift();
-    this.scene.remove(powerLineToRemove.pole);
-    this.scene.remove(powerLineToRemove.cross);
-    var powerLineToAdd = this.createPowerLine();
-    this.powerLines.push(powerLineToAdd);
-    this.scene.add(powerLineToAdd.pole);
-    this.scene.add(powerLineToAdd.cross);
-  }
-
-  addRailSegmentToEnd() {
-    var railSegmentToRemove = this.railSegments.shift();
-    this.scene.remove(railSegmentToRemove.left);
-    this.scene.remove(railSegmentToRemove.right);
-    var railSegmentToAdd = this.createRailSegment();
-    this.railSegments.push(railSegmentToAdd);
-    this.scene.add(railSegmentToAdd.left);
-    this.scene.add(railSegmentToAdd.right);
-  }
-
-  addPowerLinesToScene() {
-    var _this3 = this;
-
-    var numberOfPowerLines = numRails * railSpacing / powerLineSpacing;
-    this.powerLines = range(numberOfPowerLines).map(function () {
-      return _this3.createPowerLine();
-    });
-    this.powerLines.forEach(function (_ref) {
-      var cross = _ref.cross,
-          pole = _ref.pole;
-
-      _this3.scene.add(cross);
-      _this3.scene.add(pole);
-    });
-  }
-
-  createPowerLine() {
-    powerLineTicker++;
-    var poleHeight = 3;
-    var material = new MeshBasicMaterial({ color: this.materialColor });
-    var x = sample([-5, 5]);
-
-    var poleGeometry = new CylinderGeometry(0.02, 0.02, poleHeight, 32);
-    var pole = new Mesh(poleGeometry, material);
-    pole.position.set(x, groundLevel + poleHeight / 2, -powerLineTicker * powerLineSpacing);
-
-    var crossGeometry = new CylinderGeometry(0.02, 0.02, 0.4, 32);
-    var cross = new Mesh(crossGeometry, material);
-    cross.rotation.z = Math.PI / 2;
-    cross.position.set(x, groundLevel + 2 * poleHeight / 3, -powerLineTicker * powerLineSpacing);
-
-    return { pole: pole, cross: cross };
-  }
-
-  addRailSegmentsToScene(number) {
-    var _this4 = this;
-
-    this.railSegments = range(number).map(function () {
-      return _this4.createRailSegment();
-    });
-    this.railSegments.forEach(function (_ref2) {
-      var left = _ref2.left,
-          right = _ref2.right;
-
-      _this4.scene.add(left);
-      _this4.scene.add(right);
-    });
-  }
-
-  createRailSegment() {
-    railTicker++;
-    var geometry = new BoxGeometry(0.2, 0.02, 1);
-    var material = new MeshBasicMaterial({ color: this.materialColor });
-    var left = new Mesh(geometry, material);
-    left.position.set(-3, groundLevel, -railTicker * railSpacing);
-    var right = new Mesh(geometry, material);
-    right.position.set(3, groundLevel, -railTicker * railSpacing);
-    return { left: left, right: right };
-  }
-
 }
 
 module.exports = Environment;
 
-},{"jquery":12,"lodash.range":14,"lodash.round":15,"lodash.sample":16,"three":27,"three-window-resize":26}],34:[function(require,module,exports){
+},{"../constants":33,"./collection":34,"./power-line":36,"./rail-segment":37,"jquery":12,"three":27,"three-window-resize":26}],36:[function(require,module,exports){
+var THREE = require('three');
+var MeshBasicMaterial = THREE.MeshBasicMaterial,
+    Mesh = THREE.Mesh,
+    CylinderGeometry = THREE.CylinderGeometry;
+
+var sample = require('lodash.sample');
+
+var _require = require('../constants'),
+    groundLevel = _require.groundLevel,
+    powerLineSpacing = _require.powerLineSpacing;
+
+var powerLineTicker = 0;
+
+class PowerLine {
+  constructor(_ref) {
+    var scene = _ref.scene,
+        color = _ref.color;
+
+    powerLineTicker++;
+    var poleHeight = 3;
+    var material = new MeshBasicMaterial({ color: color });
+    var x = sample([-5, 5]);
+
+    var poleGeometry = new CylinderGeometry(0.02, 0.02, poleHeight, 32);
+    this.pole = new Mesh(poleGeometry, material);
+    this.pole.position.set(x, groundLevel + poleHeight / 2, -powerLineTicker * powerLineSpacing);
+
+    var crossGeometry = new CylinderGeometry(0.02, 0.02, 0.4, 32);
+    this.cross = new Mesh(crossGeometry, material);
+    this.cross.rotation.z = Math.PI / 2;
+    this.cross.position.set(x, groundLevel + 2 * poleHeight / 3, -powerLineTicker * powerLineSpacing);
+
+    this.scene = scene;
+    this.scene.add(this.pole, this.cross);
+  }
+
+  remove() {
+    this.scene.remove(this.pole, this.cross);
+  }
+}
+
+module.exports = PowerLine;
+
+},{"../constants":33,"lodash.sample":16,"three":27}],37:[function(require,module,exports){
+var THREE = require('three');
+var MeshBasicMaterial = THREE.MeshBasicMaterial,
+    Mesh = THREE.Mesh,
+    BoxGeometry = THREE.BoxGeometry;
+
+var _require = require('../constants'),
+    groundLevel = _require.groundLevel,
+    railSpacing = _require.railSpacing;
+
+var railTicker = 0;
+
+class RailSegment {
+  constructor(_ref) {
+    var scene = _ref.scene,
+        color = _ref.color;
+
+    railTicker++;
+    this.left = this._mesh(color, -3);
+    this.right = this._mesh(color, 3);
+    this.scene = scene;
+    this.scene.add(this.left, this.right);
+  }
+
+  remove() {
+    this.scene.remove(this.left, this.right);
+  }
+
+  _mesh(color, x) {
+    var geometry = new BoxGeometry(0.2, 0.02, 1);
+    var material = new MeshBasicMaterial({ color: color });
+    var mesh = new Mesh(geometry, material);
+    mesh.position.set(x, groundLevel, -railTicker * railSpacing);
+    return mesh;
+  }
+}
+
+module.exports = RailSegment;
+
+},{"../constants":33,"three":27}],38:[function(require,module,exports){
 var $ = require('jquery');
 var loop = require('raf-loop');
 var Environment = require('./environment');
@@ -56940,6 +57000,7 @@ var Space = require('./space');
 var AudioInterface = require('./audio-interface');
 var round = require('lodash.round');
 var MountainRange = require('./mountain-range');
+var convert = require('color-convert');
 
 class Engine {
 
@@ -56979,16 +57040,17 @@ class Engine {
         isDay = !isDay;
       }
       if (ticker > 180 - lightChangeCountdown) {
-        var currentCount = 180 - ticker;
-        if (isDay) {
-          _this.view.makeDarker(currentCount, lightChangeCountdown);
-          _this.environment.makeLighter(currentCount, lightChangeCountdown);
-          _this.mountainRange.makeLighter(currentCount, lightChangeCountdown);
-        } else {
-          _this.view.makeLighter(currentCount, lightChangeCountdown);
-          _this.environment.makeDarker(currentCount, lightChangeCountdown);
-          _this.mountainRange.makeDarker(currentCount, lightChangeCountdown);
-        }
+        var lightness = (180 - ticker) / lightChangeCountdown;
+        var colors = isDay ? {
+          primary: convert.hsl.hex(0, 0, (1 - lightness) * 100),
+          secondary: convert.hsl.hex(0, 0, lightness * 100)
+        } : {
+          primary: convert.hsl.hex(0, 0, lightness * 100),
+          secondary: convert.hsl.hex(0, 0, (1 - lightness) * 100)
+        };
+        _this.view.renderColors(colors.primary, colors.secondary);
+        _this.mountainRange.renderColors(colors.primary, colors.secondary);
+        _this.environment.renderColors(colors.primary);
       }
     }).start();
   }
@@ -56997,18 +57059,17 @@ class Engine {
 
 module.exports = Engine;
 
-},{"./audio-interface":32,"./environment":33,"./mountain-range":35,"./space":36,"./view":37,"jquery":12,"lodash.round":15,"raf-loop":21}],35:[function(require,module,exports){
+},{"./audio-interface":32,"./environment":35,"./mountain-range":39,"./space":40,"./view":42,"color-convert":4,"jquery":12,"lodash.round":15,"raf-loop":21}],39:[function(require,module,exports){
 var $ = require('jquery');
 var scale = require('scale-number-range');
-var convert = require('color-convert');
 
 class MountainRange {
 
   constructor() {
     this.canvas = $('#mountain-range')[0];
     this.ctx = this.canvas.getContext('2d');
-    this.ctx.lineWidth = 2;
     this.strokeStyle = 'black';
+    this.fillStyle = 'white';
     this.setDimensions();
     this.bindEventListeners();
   }
@@ -57019,7 +57080,8 @@ class MountainRange {
 
   setDimensions() {
     this.canvas.width = $(window).width();
-    this.canvas.height = $(window).height() * 0.5111;
+    this.canvas.height = $(window).height();
+    this.mountainRangeHeight = $(window).height() * 0.5111;
   }
 
   render(data) {
@@ -57027,19 +57089,20 @@ class MountainRange {
 
     var pointYCoords = [];
     data.forEach(function (y) {
-      pointYCoords.push(y * _this.canvas.height * 0.002);
+      pointYCoords.push(y * _this.mountainRangeHeight * 0.002);
       pointYCoords.push(0);
     });
     var coords = pointYCoords.map(function (y, i, arr) {
       return {
         x: scale(i + 1, 0, arr.length, 0, _this.canvas.width),
-        y: _this.canvas.height - 1 * y
+        y: _this.mountainRangeHeight - 1 * y
       };
     });
 
     this.ctx.strokeStyle = this.strokeStyle;
+    this.ctx.fillStyle = this.fillStyle;
     this.ctx.beginPath();
-    this.ctx.moveTo(0, this.canvas.height);
+    this.ctx.moveTo(0, this.mountainRangeHeight);
     var i = void 0;
     for (i = 0; i < coords.length - 2; i++) {
       var xc = (coords[i].x + coords[i + 1].x) / 2;
@@ -57047,28 +57110,23 @@ class MountainRange {
       this.ctx.quadraticCurveTo(coords[i].x, coords[i].y, xc, yc);
     }
     this.ctx.quadraticCurveTo(coords[i].x, coords[i].y, coords[i + 1].x, coords[i + 1].y);
-    this.ctx.lineTo(0, this.canvas.height);
+    this.ctx.lineTo(0, this.mountainRangeHeight);
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    this.ctx.fillRect(0, this.mountainRangeHeight, this.canvas.width, this.canvas.height);
+    this.ctx.fill();
     this.ctx.stroke();
   }
 
-  makeDarker(currentCount, totalCount) {
-    var opacity = currentCount / totalCount;
-    var strokeStyle = convert.hsl.hex(0, 0, opacity * 100);
-    this.strokeStyle = '#' + strokeStyle;
-  }
-
-  makeLighter(currentCount, totalCount) {
-    var opacity = currentCount / totalCount;
-    var strokeStyle = convert.hsl.hex(0, 0, (1 - opacity) * 100);
-    this.strokeStyle = '#' + strokeStyle;
+  renderColors(primary, secondary) {
+    this.strokeStyle = '#' + primary;
+    this.fillStyle = '#' + secondary;
   }
 
 }
 
 module.exports = MountainRange;
 
-},{"color-convert":4,"jquery":12,"scale-number-range":25}],36:[function(require,module,exports){
+},{"jquery":12,"scale-number-range":25}],40:[function(require,module,exports){
 var $ = require('jquery');
 var min = require('lodash.min');
 
@@ -57098,7 +57156,7 @@ class Space {
   }
 
   update(theta, loudness) {
-    var diameter = loudness / 255 * this.spaceSize * 0.25;
+    var diameter = 50 + loudness / 255 * this.spaceSize * 0.25;
     var centerX = $(window).width() / 2 - diameter / 2;
     var centerY = $(window).height() / 2 - diameter / 2;
     this.$sun.css({ width: diameter, height: diameter });
@@ -57117,9 +57175,15 @@ class Space {
 
 module.exports = Space;
 
-},{"jquery":12,"lodash.min":13}],37:[function(require,module,exports){
+},{"jquery":12,"lodash.min":13}],41:[function(require,module,exports){
+var audioList = [{ img: 'a3247042134_2.jpg', album: 'dead-beat-til-i-die', title: 'dead//beat til i die' }, { img: 'a3287578958_2.jpg', album: 'steeping', title: 'steeping' }, { img: 'a2557375228_2.jpg', album: 'motionless', title: 'motionless' }, { img: 'a2361122322_2.jpg', album: 'stress', title: 'stress' }, { img: 'a3136442865_2.jpg', album: 'low-vibes', title: 'low vibes' }, { img: 'a0412213850_2.jpg', album: 'untitled-ep-4', title: 'untitled ep4' }, { img: 'a1343068421_2.jpg', album: 'untitled-ep-3', title: 'untitled ep3' }, { img: 'a1637662097_2.jpg', album: 'takes-the-air', title: 'takes the air' }, { img: 'a3163431488_2.jpg', album: 'untitled-ep-2', title: 'untitled ep 2' }, { img: 'a2362660752_2.jpg', album: 'untitled-ep', title: 'untitled ep' }, { img: 'a0499335438_2.jpg', album: 'thought-loop', title: 'thought loop' }, { img: 'a0500555093_2.jpg', album: 'hfpn011-a-long-interval-marked-by-nothing-of-distinguished-note', title: '(HFPN011) a long interval, marked by nothing of distinguished note' }, { img: 'a2317249876_2.jpg', album: 'cold-heart-warm', title: 'cold/heart\\warm' }, { img: 'a3290534802_2.jpg', album: 'music-to-watch-clouds-with', title: 'music to watch clouds with' }, { img: 'a3201699299_2.jpg', album: 'so-long-blue-skies', title: '(so long) blue skies' }, { img: 'a4109433261_2.jpg', album: 'view', title: 'view' }, { img: 'a4085011476_2.jpg', album: 'ilo', title: 'ilo' }, { img: 'a2870091575_2.jpg', album: 'well', title: 'well' }, { img: 'a0329685018_2.jpg', album: '-', title: '...' }, { img: 'a2153041237_2.jpg', album: 'styrofoam-sleep', title: 'Styrofoam Sleep' }, { img: 'a1789288278_2.jpg', album: 'red-oak-intermodulation', title: 'Red Oak Intermodulation' }, { img: 'a4058127069_2.jpg', album: 'um-ah', title: 'Um / Ah' }, { img: 'a1942401491_2.jpg', album: 'oh-people', title: 'Oh [people]' }];
+
+module.exports = audioList;
+
+},{}],42:[function(require,module,exports){
 var $ = require('jquery');
-var convert = require('color-convert');
+var audioList = require('./audio-list');
+var videoList = require('./video-list');
 
 class View {
 
@@ -57127,30 +57191,24 @@ class View {
     var audioInterface = _ref.audioInterface;
 
     this.audioInterface = audioInterface;
-    this.textHex = 'FFFFFF';
-    this.backgroundHex = '000000';
     this.bindEventListeners();
   }
 
   populateAudioPanel() {
-    var html = [{ imgUrl: 'https://f4.bcbits.com/img/a3247042134_2.jpg', bcUrl: 'https://lotsoflettershere.bandcamp.com/album/dead-beat-til-i-die', title: 'dead//beat til i die' }, { imgUrl: 'https://f4.bcbits.com/img/a3287578958_2.jpg', bcUrl: 'https://lotsoflettershere.bandcamp.com/album/steeping', title: 'steeping' }, { imgUrl: 'https://f4.bcbits.com/img/a2557375228_2.jpg', bcUrl: 'https://lotsoflettershere.bandcamp.com/album/motionless', title: 'motionless' }, { imgUrl: 'https://f4.bcbits.com/img/a2361122322_2.jpg', bcUrl: 'https://lotsoflettershere.bandcamp.com/album/stress', title: 'stress' }, { imgUrl: 'https://f4.bcbits.com/img/a3136442865_2.jpg', bcUrl: 'https://lotsoflettershere.bandcamp.com/album/low-vibes', title: 'low vibes' }, { imgUrl: 'https://f4.bcbits.com/img/a0412213850_2.jpg', bcUrl: 'https://lotsoflettershere.bandcamp.com/album/untitled-ep-4', title: 'untitled ep4' }, { imgUrl: 'https://f4.bcbits.com/img/a1343068421_2.jpg', bcUrl: 'https://lotsoflettershere.bandcamp.com/album/untitled-ep-3', title: 'untitled ep3' }, { imgUrl: 'https://f4.bcbits.com/img/a1637662097_2.jpg', bcUrl: 'https://lotsoflettershere.bandcamp.com/album/takes-the-air', title: 'takes the air' }, { imgUrl: 'https://f4.bcbits.com/img/a3163431488_2.jpg', bcUrl: 'https://lotsoflettershere.bandcamp.com/album/untitled-ep-2', title: 'untitled ep 2' }, { imgUrl: 'https://f4.bcbits.com/img/a2362660752_2.jpg', bcUrl: 'https://lotsoflettershere.bandcamp.com/album/untitled-ep', title: 'untitled ep' }, { imgUrl: 'https://f4.bcbits.com/img/a0499335438_2.jpg', bcUrl: 'https://lotsoflettershere.bandcamp.com/album/thought-loop', title: 'thought loop' }, { imgUrl: 'https://f4.bcbits.com/img/a0500555093_2.jpg', bcUrl: 'https://lotsoflettershere.bandcamp.com/album/hfpn011-a-long-interval-marked-by-nothing-of-distinguished-note', title: '(HFPN011) a long interval, marked by nothing of distinguished note' }, { imgUrl: 'https://f4.bcbits.com/img/a2317249876_2.jpg', bcUrl: 'https://lotsoflettershere.bandcamp.com/album/cold-heart-warm', title: 'cold/heart\\warm' }, { imgUrl: 'https://f4.bcbits.com/img/a3290534802_2.jpg', bcUrl: 'https://lotsoflettershere.bandcamp.com/album/music-to-watch-clouds-with', title: 'music to watch clouds with' }, { imgUrl: 'https://f4.bcbits.com/img/a3201699299_2.jpg', bcUrl: 'https://lotsoflettershere.bandcamp.com/album/so-long-blue-skies', title: '(so long) blue skies' }, { imgUrl: 'https://f4.bcbits.com/img/a4109433261_2.jpg', bcUrl: 'https://lotsoflettershere.bandcamp.com/album/view', title: 'view' }, { imgUrl: 'https://f4.bcbits.com/img/a4085011476_2.jpg', bcUrl: 'https://lotsoflettershere.bandcamp.com/album/ilo', title: 'ilo' }, { imgUrl: 'https://f4.bcbits.com/img/a2870091575_2.jpg', bcUrl: 'https://lotsoflettershere.bandcamp.com/album/well', title: 'well' }, { imgUrl: 'https://f4.bcbits.com/img/a0329685018_2.jpg', bcUrl: 'https://lotsoflettershere.bandcamp.com/album/-', title: '...' }, { imgUrl: 'https://f4.bcbits.com/img/a2153041237_2.jpg', bcUrl: 'https://lotsoflettershere.bandcamp.com/album/styrofoam-sleep', title: 'Styrofoam Sleep' }, { imgUrl: 'https://f4.bcbits.com/img/a1789288278_2.jpg', bcUrl: 'https://lotsoflettershere.bandcamp.com/album/red-oak-intermodulation', title: 'Red Oak Intermodulation' }, { imgUrl: 'https://f4.bcbits.com/img/a4058127069_2.jpg', bcUrl: 'https://lotsoflettershere.bandcamp.com/album/um-ah', title: 'Um / Ah' }, { imgUrl: 'https://f4.bcbits.com/img/a1942401491_2.jpg', bcUrl: 'https://lotsoflettershere.bandcamp.com/album/oh-people', title: 'Oh [people]' }].map(function (_ref2) {
-      var imgUrl = _ref2.imgUrl,
-          bcUrl = _ref2.bcUrl,
+    $('#audio-panel').html(audioList.map(function (_ref2) {
+      var img = _ref2.img,
+          album = _ref2.album,
           title = _ref2.title;
-
-      return '\n        <a href=' + bcUrl + ' class="album-link" target="_blank">\n          <img class="album-art" src=' + imgUrl + ' />\n        </a>\n      ';
-    });
-    $('#audio-panel').html(html);
+      return '\n      <a href="https://lotsoflettershere.bandcamp.com/album/' + album + '" class="album-link" target="_blank">\n        <img class="album-art" src="https://f4.bcbits.com/img/' + img + '" />\n      </a>\n    ';
+    }));
   }
 
   populateVideoPanel() {
-    var html = [{ gifUrl: './media/0.gif', src: 'https://github.com/data-doge/hosted-videos/blob/master/0.mp4?raw=true' }, { gifUrl: './media/1.gif', src: 'https://github.com/data-doge/hosted-videos/blob/master/1.mp4?raw=true' }, { gifUrl: './media/2.gif', src: 'https://github.com/data-doge/hosted-videos/blob/master/2.mp4?raw=true' }, { gifUrl: './media/3.gif', src: 'https://github.com/data-doge/hosted-videos/blob/master/3.mp4?raw=true' }, { gifUrl: './media/4.gif', src: 'https://github.com/data-doge/hosted-videos/blob/master/4.mp4?raw=true' }].map(function (_ref3) {
-      var gifUrl = _ref3.gifUrl,
-          src = _ref3.src;
-
-      return '\n        <img class="video-art" src=' + gifUrl + ' data-src=' + src + ' />\n      ';
-    });
-    $('#video-panel').html(html);
+    $('#video-panel').html(videoList.map(function (_ref3) {
+      var gif = _ref3.gif,
+          audio = _ref3.audio;
+      return '\n      <img class="video-art" src=' + gif + ' data-src="https://github.com/data-doge/hosted-videos/blob/master/' + audio + '?raw=true" />\n    ';
+    }));
   }
 
   closeLoadingScreen() {
@@ -57159,6 +57217,7 @@ class View {
 
   bindEventListeners() {
     $('.nav-link').on('click', this.handleNavLinkClick.bind(this));
+    $('#home').on('click', this.hideAllPanels.bind(this));
     $(document).on('click', '.video-art', this.handleVideoLinkClick.bind(this));
     $(document).on('click', '#close-video', this.handleCloseVideoClick.bind(this));
   }
@@ -57166,61 +57225,55 @@ class View {
   handleNavLinkClick(e) {
     e.preventDefault();
     var id = e.target.id;
-    if (id === 'audio') {
-      this.populateAudioPanel();
+    var $panel = $('#' + id + '-panel');
+    if ($panel.attr('data-selected') === 'true') {
+      $panel.hide().attr('data-selected', false);
+    } else {
+      if (id === 'audio') {
+        this.populateAudioPanel();
+      }
+      if (id === 'video') {
+        this.populateVideoPanel();
+      }
+      this.hideAllPanels();
+      $panel.show().attr('data-selected', true);
     }
-    if (id === 'video') {
-      this.populateVideoPanel();
-    }
-    $('.panel').hide();
-    $('#' + id + '-panel').show();
+  }
+
+  hideAllPanels() {
+    $('.panel').hide().attr('data-selected', false);
   }
 
   handleVideoLinkClick(e) {
     this.audioInterface.pause();
     var src = $(e.target).attr('data-src');
-    var $video = $('\n      <div id="video-container">\n        <div id="close-video">&times;</div>\n        <video autoplay>\n          <source src="' + src + '"></source>\n        </video>\n      </div>\n    ');
-    $('body').append($video);
+    $('body').append($('\n      <div id="video-container">\n        <div id="close-video">&times;</div>\n        <video autoplay>\n          <source src="' + src + '"></source>\n        </video>\n      </div>\n    '));
   }
 
   handleCloseVideoClick(e) {
     $('#video-container').remove();
   }
 
-  makeDarker(currentCount, totalCount) {
-    var opacity = currentCount / totalCount;
-    var backgroundHex = convert.hsl.hex(0, 0, opacity * 100);
-    this.backgroundHex = backgroundHex;
-    var textHex = convert.hsl.hex(0, 0, (1 - opacity) * 100);
-    this.textHex = textHex;
-    this.renderColors();
-  }
-
-  makeLighter(currentCount, totalCount) {
-    var opacity = currentCount / totalCount;
-    var backgroundHex = convert.hsl.hex(0, 0, (1 - opacity) * 100);
-    this.backgroundHex = backgroundHex;
-    var textHex = convert.hsl.hex(0, 0, opacity * 100);
-    this.textHex = textHex;
-    this.renderColors();
-  }
-
-  renderColors() {
-    $('body').css({ background: '#' + this.backgroundHex });
-    $('#ground-overlay').css({ background: '#' + this.backgroundHex });
-    $('.color-transition-copy').css({ background: '#' + this.textHex, color: '#' + this.backgroundHex });
-    $('.audio-control').css({ color: '#' + this.textHex });
+  renderColors(primary, secondary) {
+    $('body').css({ background: '#' + secondary });
+    $('.color-transition-copy').css({ background: '#' + primary, color: '#' + secondary });
+    $('.audio-control').css({ color: '#' + primary });
   }
 
 }
 
 module.exports = View;
 
-},{"color-convert":4,"jquery":12}],38:[function(require,module,exports){
+},{"./audio-list":41,"./video-list":43,"jquery":12}],43:[function(require,module,exports){
+var videoList = [{ gif: './media/0.gif', audio: '0.mp4' }, { gif: './media/1.gif', audio: '1.mp4' }, { gif: './media/2.gif', audio: '2.mp4' }, { gif: './media/3.gif', audio: '3.mp4' }, { gif: './media/4.gif', audio: '4.mp4' }];
+
+module.exports = videoList;
+
+},{}],44:[function(require,module,exports){
 var Engine = require('./engine');
 
 var engine = new Engine();
 engine.bindEventListeners();
 engine.start();
 
-},{"./engine":34}]},{},[38]);
+},{"./engine":38}]},{},[44]);
