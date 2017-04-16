@@ -22,9 +22,6 @@ class MountainRange {
     this.mountainRangeHeight = $(window).height() * 0.5111
   }
 
-  drawGround () {
-  }
-
   render (data) {
     let pointYCoords = []
     data.forEach(y => {
