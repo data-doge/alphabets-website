@@ -1,0 +1,10 @@
+{
+   "index": "index.html",
+   "region": "us-west-1",
+   "uploadDir": "dist",
+   "prefix": "",
+   "corsConfiguration": [],
+   "enableCloudfront": false,
+   "retries": 20,
+   "domain": "jesseinman.com"
+}
