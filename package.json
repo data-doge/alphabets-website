@@ -35,6 +35,7 @@
   "homepage": "https://github.com/data-doge/alphabets-website",
   "dependencies": {
     "color-convert": "^1.8.2",
+    "detectie": "^1.0.0",
     "jquery": "^2.2.3",
     "lodash.min": "^4.0.1",
     "lodash.range": "^3.2.0",
