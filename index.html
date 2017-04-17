@@ -2,9 +2,11 @@
 <html lang="">
   <head>
     <meta charset="utf-8" />
-    <title>alphabets</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="Jesse Inman is a sound collage artist, music recording person, and amateur electrical enthusiast based out of Reseda, CA.">
+    <link rel="shortcut icon" type="image/x-icon" href="./media/favicon.ico">
     <link href="./css/index.css" rel="stylesheet" />
+    <title>moke</title>
     <link href="./css/font-awesome.min.css" rel="stylesheet" />
   </head>
 
@@ -12,10 +14,15 @@
     <div id="copy-container">
       <div id="header-container">
         <h1 id="header" class="color-transition-copy"><a id="home">Alphabets</a></h1>
-        <i class="fa fa-step-backward audio-control" id="step-backward"></i>
-        <i class="fa fa-step-forward audio-control" id="step-forward"></i>
-        <i class="fa fa-pause audio-control" id="pause"></i>
-        <i class="fa fa-play audio-control" id="play"></i>
+        <span class="audio-control-container">
+            <i class="fa fa-step-backward audio-control" id="step-backward"></i>
+            <i class="fa fa-step-forward audio-control" id="step-forward"></i>
+            <i class="fa fa-pause audio-control" id="pause"></i>
+            <i class="fa fa-play audio-control" id="play"></i>
+            <span id="indicator-container">
+              <div id="indicator">{ <span id="label">⅓</span> }</div>
+            </span>
+        </span>
       </div>
 
       <ul id="nav-links">
