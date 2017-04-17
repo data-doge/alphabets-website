@@ -26,7 +26,7 @@ class Space {
   }
 
   update (theta, loudness) {
-    const diameter = 50 + loudness / 255 * this.spaceSize * 0.25
+    const diameter = 50 + loudness / 255 * this.spaceSize * 0.15
     const centerX = $(window).width() / 2 - diameter / 2
     const centerY = $(window).height() / 2 - diameter / 2
     this.$sun.css({ width: diameter, height: diameter })
