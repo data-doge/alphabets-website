@@ -29,7 +29,7 @@ class Engine {
 
     loop(t => {
       this.environment.render()
-      deg += 0.1
+      deg += 0.08
       const { overallAmplitude, frequencies } = this.audioInterface.measure()
       this.mountainRange.render(frequencies)
 
