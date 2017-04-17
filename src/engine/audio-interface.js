@@ -78,9 +78,11 @@ class AudioInterface {
   }
 
   pause () {
-    $('#pause').hide()
-    $('#play').show()
-    this.currentAudio().pause()
+    if (!this.currentAudio().paused) {
+      $('#pause').hide()
+      $('#play').show()
+      this.currentAudio().pause()
+    }
   }
 
   play () {
