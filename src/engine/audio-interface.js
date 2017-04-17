@@ -16,7 +16,7 @@ class AudioInterface {
     this.analyser = webAudioAnalyser2({
       context: this.ctx,
       fftSize: 2048,
-      equalTemperedFreqBinCount: 7
+      addSubBassToBarkScale: true
     })
     this.out = this.ctx.destination
     this.currentSource().connect(this.analyser)
@@ -47,7 +47,7 @@ class AudioInterface {
   }
 
   measure () {
-    const { frequencies, overallAmplitude } = this.analyser.equalTemperedFrequencyData(7)
+    const { frequencies, overallAmplitude } = this.analyser.barkScaleFrequencyData()
     return { frequencies, overallAmplitude }
   }
 

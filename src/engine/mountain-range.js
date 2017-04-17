@@ -23,9 +23,9 @@ class MountainRange {
 
   render (data) {
     let pointYCoords = []
-    data.forEach(y => {
+    data.forEach((y, i, arr) => {
       pointYCoords.push(y * this.mountainRangeHeight * 0.002)
-      pointYCoords.push(0)
+      if (i % 4 === 3 || i === arr.length - 1) { pointYCoords.push(0) }
     })
     const coords = pointYCoords.map((y, i, arr) => ({
       x: scale(i + 1, 0, arr.length, 0, this.canvas.width),
