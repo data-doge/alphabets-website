@@ -71,6 +71,7 @@ class View {
   renderColors (primary, secondary) {
     $('body').css({ background: `#${secondary}` })
     $('.color-transition-copy').css({ background: `#${primary}`, color: `#${secondary}` })
+    $('#indicator').css({ color: `#${primary}` })
     $('.audio-control').css({ color: `#${primary}` })
   }
 }

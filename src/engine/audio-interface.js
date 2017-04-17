@@ -1,8 +1,10 @@
 const $ = require('jquery')
 const webAudioAnalyser2 = require('web-audio-analyser-2')
 const range = require('lodash.range')
-const audioIds = range(10).map(i => `#track-${i}`)
+const zipObject = require('lodash.zipObject')
 const rotate = require('rotate-array')
+const audioIds = range(10).map(i => `#track-${i}`)
+const audioLabels = zipObject(audioIds, ['⅓', '⅔', '⅕', '⅖', '⅗', '⅘', '⅙', '⅚', '⅛', '⅜'])
 
 class AudioInterface {
   constructor () {
@@ -64,6 +66,7 @@ class AudioInterface {
     this.currentAudio().currentTime = 0
     this.sources = rotate(this.sources, 1)
     this.currentSource().connect(this.analyser)
+    this.setLabel()
     this.play()
   }
 
@@ -71,6 +74,7 @@ class AudioInterface {
     if (this.currentAudio().paused) {
       this.sources = rotate(this.sources, -1)
       this.currentSource().connect(this.analyser)
+      this.setLabel()
     } else {
       this.pause()
       this.currentAudio().currentTime = 0
@@ -89,6 +93,10 @@ class AudioInterface {
     $('#play').hide()
     $('#pause').show()
     setTimeout(() => { this.currentAudio().play() }, 1000)
+  }
+
+  setLabel () {
+    $('#label').html(audioLabels['#' + this.currentAudio().id])
   }
 }
 
