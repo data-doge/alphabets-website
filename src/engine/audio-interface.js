@@ -8,21 +8,7 @@ const audioLabels = zipObject(audioIds, ['⅓', '⅔', '⅕', '⅖', '⅗', '⅘
 
 class AudioInterface {
   constructor () {
-    this.currentAudioIdIndex = 0
-    this.ctx = new (window.webkitAudioContext || window.AudioContext)()
-    this.sources = audioIds.map(id => {
-      let source = this.ctx.createMediaElementSource($(id)[0])
-      if (!source.mediaElement) { source.mediaElement = $(id)[0] } // patch for AudioContext/firefox
-      return source
-    })
-    this.analyser = webAudioAnalyser2({
-      context: this.ctx,
-      fftSize: 2048,
-      addSubBassToBarkScale: true
-    })
-    this.out = this.ctx.destination
-    this.currentSource().connect(this.analyser)
-    this.analyser.connect(this.out)
+    this.initialized = false
     this.bindEventListeners()
   }
 
@@ -43,14 +29,43 @@ class AudioInterface {
       this.stepBackward()
       $('#step-sound')[0].play()
     })
+  }
+
+  initialize () {
+    if (this.initialized) {
+      return
+    }
+    this.initialized = true
+    this.currentAudioIdIndex = 0
+    this.ctx = new (window.webkitAudioContext || window.AudioContext)()
+    this.sources = audioIds.map(id => {
+      let source = this.ctx.createMediaElementSource($(id)[0])
+      if (!source.mediaElement) { source.mediaElement = $(id)[0] } // patch for AudioContext/firefox
+      return source
+    })
+    this.analyser = webAudioAnalyser2({
+      context: this.ctx,
+      fftSize: 2048,
+      addSubBassToBarkScale: true
+    })
+    this.out = this.ctx.destination
+    this.currentSource().connect(this.analyser)
+    this.analyser.connect(this.out)
     this.sources.forEach(source => {
       source.mediaElement.onended = this.stepForward.bind(this)
     })
   }
 
   measure () {
-    const { frequencies, overallAmplitude } = this.analyser.barkScaleFrequencyData()
-    return { frequencies, overallAmplitude }
+    if (this.initialized) {
+      const { frequencies, overallAmplitude } = this.analyser.barkScaleFrequencyData()
+      return { frequencies, overallAmplitude }
+    } else {
+      return {
+        frequencies: range(25).map(n => 0),
+        overallAmplitude: 0
+      }
+    }
   }
 
   currentSource () {
@@ -90,6 +105,7 @@ class AudioInterface {
   }
 
   play () {
+    this.initialize()
     $('#play').hide()
     $('#pause').show()
     setTimeout(() => { this.currentAudio().play() }, 1000)
